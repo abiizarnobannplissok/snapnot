@@ -1,4 +1,4 @@
-import { useRef, useState, ReactNode } from 'react';
+import React, { useRef, useCallback, ReactNode, memo } from 'react';
 import { motion, useMotionValue, useSpring } from 'motion/react';
 import './TiltedCard.css';
 
@@ -17,7 +17,7 @@ interface TiltedCardProps {
   className?: string;
 }
 
-export default function TiltedCard({
+function TiltedCardComponent({
   children,
   containerHeight = 'auto',
   containerWidth = '100%',
@@ -31,9 +31,7 @@ export default function TiltedCard({
   const rotateY = useSpring(useMotionValue(0), springValues);
   const scale = useSpring(1, springValues);
 
-  const [lastY, setLastY] = useState(0);
-
-  function handleMouse(e: React.MouseEvent<HTMLDivElement>) {
+  const handleMouse = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     if (!ref.current) return;
 
     const rect = ref.current.getBoundingClientRect();
@@ -45,19 +43,17 @@ export default function TiltedCard({
 
     rotateX.set(rotationX);
     rotateY.set(rotationY);
+  }, [rotateAmplitude, rotateX, rotateY]);
 
-    setLastY(offsetY);
-  }
-
-  function handleMouseEnter() {
+  const handleMouseEnter = useCallback(() => {
     scale.set(scaleOnHover);
-  }
+  }, [scale, scaleOnHover]);
 
-  function handleMouseLeave() {
+  const handleMouseLeave = useCallback(() => {
     scale.set(1);
     rotateX.set(0);
     rotateY.set(0);
-  }
+  }, [scale, rotateX, rotateY]);
 
   return (
     <div
@@ -86,3 +82,6 @@ export default function TiltedCard({
     </div>
   );
 }
+
+const TiltedCard = memo(TiltedCardComponent);
+export default TiltedCard;

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, memo } from 'react';
 import { Edit2, Copy, Trash2, Clock, User, Check } from 'lucide-react';
 import { Note } from '../types';
 import { COLORS } from '../constants';
@@ -14,7 +14,7 @@ interface NoteCardProps {
   onToggleSelect?: () => void;
 }
 
-export const NoteCard: React.FC<NoteCardProps> = ({ 
+const NoteCardComponent: React.FC<NoteCardProps> = ({ 
   note, 
   onEdit, 
   onDelete, 
@@ -27,29 +27,42 @@ export const NoteCard: React.FC<NoteCardProps> = ({
   const colorStyle = COLORS[note.color] || COLORS.yellow;
   const isNew = Date.now() - note.createdAt < 5 * 60 * 1000;
 
-  const formatDate = (timestamp: number) => {
+  const formatDate = useCallback((timestamp: number) => {
     return new Intl.DateTimeFormat('id-ID', {
       day: 'numeric',
       month: 'short',
       hour: '2-digit',
       minute: '2-digit',
     }).format(new Date(timestamp));
-  };
+  }, []);
 
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = useCallback(() => {
     if (isDeleting) {
       onDelete(note.id);
     } else {
       setIsDeleting(true);
       setTimeout(() => setIsDeleting(false), 3000);
     }
-  };
+  }, [isDeleting, onDelete, note.id]);
 
-  const handleCardClick = () => {
+  const handleCardClick = useCallback(() => {
     if (selectionMode && onToggleSelect) {
       onToggleSelect();
     }
-  };
+  }, [selectionMode, onToggleSelect]);
+
+  const handleCopyClick = useCallback(() => {
+    onCopy(note);
+  }, [onCopy, note]);
+
+  const handleEditClick = useCallback(() => {
+    onEdit(note);
+  }, [onEdit, note]);
+
+  const handleToggleClick = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    onToggleSelect?.();
+  }, [onToggleSelect]);
 
   const cardContent = (
     <div 
@@ -66,10 +79,7 @@ export const NoteCard: React.FC<NoteCardProps> = ({
     >
     {selectionMode && (
       <button
-        onClick={(e) => {
-          e.stopPropagation();
-          onToggleSelect?.();
-        }}
+        onClick={handleToggleClick}
         className={`
           absolute top-3 right-3 w-6 h-6 rounded-full border-2 
           flex items-center justify-center z-10
@@ -117,7 +127,7 @@ export const NoteCard: React.FC<NoteCardProps> = ({
       {!selectionMode && (
         <div className="flex items-center justify-end gap-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200">
          <button
-          onClick={() => onCopy(note)}
+          onClick={handleCopyClick}
           className="w-9 h-9 flex items-center justify-center rounded-full bg-white/80 hover:bg-white text-black transition-transform hover:scale-110 shadow-sm"
           title="Salin isi ke clipboard"
         >
@@ -125,7 +135,7 @@ export const NoteCard: React.FC<NoteCardProps> = ({
         </button>
         
         <button
-          onClick={() => onEdit(note)}
+          onClick={handleEditClick}
           className="w-9 h-9 flex items-center justify-center rounded-full bg-white/80 hover:bg-white text-black transition-transform hover:scale-110 shadow-sm"
           title="Edit"
         >
@@ -162,3 +172,5 @@ export const NoteCard: React.FC<NoteCardProps> = ({
     </TiltedCard>
   );
 };
+
+export const NoteCard = memo(NoteCardComponent);
