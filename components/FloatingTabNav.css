@@ -1,19 +1,19 @@
 /* Floating Tab Navigation - Mobile Only */
 .floating-tab-nav {
   position: fixed;
-  bottom: 16px;
+  bottom: 12px;
   left: 50%;
   z-index: 1000;
   
   display: none; /* Hidden by default, shown only on mobile */
-  gap: 16px; /* Increased gap for better spacing */
-  padding: 10px 16px; /* More horizontal padding */
+  gap: 12px;
+  padding: 8px 12px;
   
   /* Apple Glass UI Style */
   background: rgba(255, 255, 255, 0.72);
   backdrop-filter: blur(40px) saturate(200%);
   -webkit-backdrop-filter: blur(40px) saturate(200%);
-  border-radius: 28px;
+  border-radius: 22px;
   border: 0.5px solid rgba(255, 255, 255, 0.5);
   box-shadow: 
     0 8px 32px rgba(0, 0, 0, 0.08),
@@ -58,10 +58,10 @@
 
 /* Tab Button Base Style */
 .tab-button {
-  width: 54px;
-  height: 54px;
+  width: 44px;
+  height: 44px;
   border: none;
-  border-radius: 16px;
+  border-radius: 12px;
   background: transparent;
   
   display: flex;
@@ -210,26 +210,26 @@
 /* Handle landscape mode on mobile */
 @media (max-width: 767px) and (orientation: landscape) {
   .floating-tab-nav {
-    bottom: 8px;
-    padding: 6px 12px;
-    gap: 12px;
+    bottom: 6px;
+    padding: 5px 10px;
+    gap: 10px;
   }
   
   .tab-button {
-    width: 48px;
-    height: 48px;
+    width: 40px;
+    height: 40px;
   }
 }
 
 /* Extra small devices */
 @media (max-width: 360px) {
   .floating-tab-nav {
-    padding: 8px 12px;
-    gap: 12px; /* Keep decent spacing even on small screens */
+    padding: 6px 10px;
+    gap: 10px; /* Keep decent spacing even on small screens */
   }
   
   .tab-button {
-    width: 48px;
-    height: 48px;
+    width: 40px;
+    height: 40px;
   }
 }

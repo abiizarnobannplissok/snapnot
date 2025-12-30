@@ -284,14 +284,14 @@ export function FileShare({ searchQuery, externalFiles, onExternalFilesProcessed
   return (
     <div className="min-h-screen pb-20">
       {/* Main Content */}
-      <main className="max-w-[1200px] mx-auto px-4 md:px-8 pt-8">
+      <main className="max-w-[1200px] mx-auto px-3 md:px-6 pt-6">
         {/* Stats */}
-        <div className="flex items-center gap-3 text-gray-600 mb-8">
-          <FolderOpen className="w-5 h-5" />
-          <span className="font-semibold">
+        <div className="flex items-center gap-2 text-gray-600 mb-6">
+          <FolderOpen className="w-4 h-4" />
+          <span className="font-semibold text-sm">
             {stats.totalGroups} Grup • {stats.totalFiles} File
             {filteredGroups.length !== fileGroups.length && (
-              <span className="ml-2 text-black font-bold">
+              <span className="ml-1.5 text-black font-bold">
                 (Menampilkan {filteredGroups.length} hasil)
               </span>
             )}
@@ -299,7 +299,7 @@ export function FileShare({ searchQuery, externalFiles, onExternalFilesProcessed
         </div>
 
         {/* Upload Area */}
-        <div className="mb-8 upload-area-scroll-target">
+        <div className="mb-6 upload-area-scroll-target">
           <FileUploadArea 
             onUpload={handleUpload} 
             loading={loading}
@@ -310,26 +310,26 @@ export function FileShare({ searchQuery, externalFiles, onExternalFilesProcessed
 
         {/* File Groups Grid */}
         <div>
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold flex items-center gap-2">
-              <FileUp className="w-6 h-6" />
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold flex items-center gap-1.5">
+              <FileUp className="w-5 h-5" />
               Semua File ({filteredGroups.length})
             </h2>
             
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               {selectionMode && selectedGroups.size > 0 && (
                 <button
                   onClick={handleDeleteSelected}
                   disabled={loading}
-                  className="h-12 px-6 bg-red-500 text-white font-bold rounded-xl hover:bg-red-600 active:scale-95 transition-all disabled:opacity-50 flex items-center gap-2 shadow-sm"
+                  className="h-10 px-4 text-sm bg-red-500 text-white font-bold rounded-lg hover:bg-red-600 active:scale-95 transition-all disabled:opacity-50 flex items-center gap-1.5 shadow-sm"
                 >
-                  <Trash2 className="w-5 h-5" />
+                  <Trash2 className="w-4 h-4" />
                   Hapus ({selectedGroups.size})
                 </button>
               )}
               <button
                 onClick={toggleSelectionMode}
-                className={`h-12 px-6 font-bold rounded-xl transition-all active:scale-95 shadow-sm ${
+                className={`h-10 px-4 text-sm font-bold rounded-lg transition-all active:scale-95 shadow-sm ${
                   selectionMode 
                     ? 'bg-gray-200 text-gray-700 hover:bg-gray-300' 
                     : 'bg-primary text-black hover:bg-primary/80'
@@ -341,21 +341,21 @@ export function FileShare({ searchQuery, externalFiles, onExternalFilesProcessed
           </div>
 
           {filteredGroups.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-20 text-center">
-              <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center mb-6 shadow-soft">
-                <span className="text-4xl">📁</span>
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mb-5 shadow-soft">
+                <span className="text-3xl">📁</span>
               </div>
-              <h3 className="text-xl font-bold mb-2">
+              <h3 className="text-lg font-bold mb-1.5">
                 {fileGroups.length > 0 ? 'Tidak ditemukan' : 'Belum ada file yang diupload'}
               </h3>
-              <p className="text-gray-600 max-w-md">
+              <p className="text-gray-600 text-sm max-w-md">
                 {fileGroups.length > 0
                   ? 'Coba gunakan kata kunci lain atau hapus pencarian.'
                   : 'Berbagi file jadi mudah dan cepat'}
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {filteredGroups.map((group) => (
                 <FileGroupCard
                   key={group.id}

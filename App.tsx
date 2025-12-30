@@ -260,24 +260,24 @@ export default function App() {
   return (
     <div ref={mainContainerRef} className="min-h-screen pb-20">
       {/* Header */}
-      <header className="sticky top-0 z-30 bg-[#F5F5F5]/90 backdrop-blur-md border-b border-border py-6 px-4 md:px-12">
+      <header className="sticky top-0 z-30 bg-[#F5F5F5]/90 backdrop-blur-md border-b border-border py-4 px-3 md:px-8">
         <div className="max-w-[1400px] mx-auto w-full">
-          <div className="flex flex-col gap-4">
-            <div className="flex flex-col md:flex-row md:items-center justify-between md:gap-8 gap-4">
+          <div className="flex flex-col gap-3">
+            <div className="flex flex-col md:flex-row md:items-center justify-between md:gap-6 gap-3">
               {/* Left Side: Logo + Tabs */}
-              <div className="flex items-center justify-between gap-4 flex-shrink-0">
-                <div className="flex items-center gap-3">
+              <div className="flex items-center justify-between gap-3 flex-shrink-0">
+                <div className="flex items-center gap-2">
                   {/* Logo */}
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2">
                     <div>
-                      <h1 className="text-2xl md:text-[32px] font-bold tracking-tight">SnapNotes</h1>
-                      <p className="text-sm text-text-secondary mt-1 whitespace-nowrap">Notes File Sharing and Translate</p>
+                      <h1 className="text-xl md:text-2xl font-bold tracking-tight">SnapNotes</h1>
+                      <p className="text-xs text-text-secondary mt-0.5 whitespace-nowrap">Notes File Sharing and Translate</p>
                     </div>
                     {activeTab === 'notes' && (
-                      <div className="bg-white px-4 py-2 rounded-[20px] shadow-sm border border-gray-100 md:hidden flex flex-col items-end">
-                        <span className="font-bold text-lg">{notes.length}</span>
+                      <div className="bg-white px-3 py-1.5 rounded-xl shadow-sm border border-gray-100 md:hidden flex flex-col items-end">
+                        <span className="font-bold text-base">{notes.length}</span>
                         {filteredNotes.length !== notes.length && (
-                          <span className="text-[10px] text-text-secondary">Tampil {filteredNotes.length}</span>
+                          <span className="text-[9px] text-text-secondary">Tampil {filteredNotes.length}</span>
                         )}
                       </div>
                     )}
@@ -287,7 +287,7 @@ export default function App() {
                 {activeTab === 'notes' && (
                   <button
                     onClick={toggleNoteSelectionMode}
-                    className={`md:hidden h-10 px-4 font-bold rounded-xl transition-all active:scale-95 shadow-sm whitespace-nowrap flex-shrink-0 ${
+                    className={`md:hidden h-8 px-3 text-sm font-bold rounded-lg transition-all active:scale-95 shadow-sm whitespace-nowrap flex-shrink-0 ${
                       noteSelectionMode 
                         ? 'bg-gray-200 text-gray-700' 
                         : 'bg-primary text-black'
@@ -298,61 +298,61 @@ export default function App() {
                 )}
 
                 {/* Navigation Tabs - Next to Logo */}
-                <div className="hidden md:flex gap-2 bg-white p-1.5 rounded-2xl shadow-sm border border-gray-100">
+                <div className="hidden md:flex gap-1.5 bg-white p-1 rounded-xl shadow-sm border border-gray-100">
                   <button
                     onClick={() => setActiveTab('notes')}
                     className={`
-                      h-10 flex items-center gap-2 px-5 rounded-xl text-sm font-medium transition-all whitespace-nowrap
+                      h-8 flex items-center gap-1.5 px-3 rounded-lg text-xs font-medium transition-all whitespace-nowrap
                       ${activeTab === 'notes'
                         ? 'bg-black text-white shadow-sm'
                         : 'text-gray-600 hover:bg-gray-100'
                       }
                     `}
                   >
-                    <StickyNote className="w-4 h-4" />
+                    <StickyNote className="w-3.5 h-3.5" />
                     <span>Catatan</span>
                   </button>
                   <button
                     onClick={() => setActiveTab('files')}
                     className={`
-                      h-10 flex items-center gap-2 px-5 rounded-xl text-sm font-medium transition-all whitespace-nowrap
+                      h-8 flex items-center gap-1.5 px-3 rounded-lg text-xs font-medium transition-all whitespace-nowrap
                       ${activeTab === 'files'
                         ? 'bg-black text-white shadow-sm'
                         : 'text-gray-600 hover:bg-gray-100'
                       }
                     `}
                   >
-                    <FileUp className="w-4 h-4" />
+                    <FileUp className="w-3.5 h-3.5" />
                     <span>File Share</span>
                   </button>
                   <button
                     onClick={() => setActiveTab('translator')}
                     className={`
-                      h-10 flex items-center gap-2 px-5 rounded-xl text-sm font-medium transition-all whitespace-nowrap
+                      h-8 flex items-center gap-1.5 px-3 rounded-lg text-xs font-medium transition-all whitespace-nowrap
                       ${activeTab === 'translator'
                         ? 'bg-black text-white shadow-sm'
                         : 'text-gray-600 hover:bg-gray-100'
                       }
                     `}
                   >
-                    <Languages className="w-4 h-4" />
+                    <Languages className="w-3.5 h-3.5" />
                     <span>Translator</span>
                   </button>
                 </div>
               </div>
 
               {/* Right Side: Actions */}
-              <div className="flex gap-3 flex-1 md:justify-end items-center">
+              <div className="flex gap-2 flex-1 md:justify-end items-center">
                 {activeTab === 'notes' ? (
                   <>
-                    <div className="relative group w-full md:w-[260px]">
-                      <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary w-5 h-5 group-focus-within:text-black transition-colors" />
+                    <div className="relative group w-full md:w-[220px]">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary w-4 h-4 group-focus-within:text-black transition-colors" />
                       <input 
                         type="text" 
                         placeholder="Cari catatan..." 
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full h-[48px] pl-12 pr-4 rounded-[20px] bg-white border border-transparent focus:border-black focus:outline-none shadow-soft transition-all placeholder:text-gray-400"
+                        className="w-full h-10 pl-9 pr-3 text-sm rounded-xl bg-white border border-transparent focus:border-black focus:outline-none shadow-soft transition-all placeholder:text-gray-400"
                       />
                     </div>
 
@@ -363,22 +363,22 @@ export default function App() {
 
                     <button 
                       onClick={() => { setEditingNote(undefined); setIsModalOpen(true); }}
-                      className="hidden md:inline-flex h-[48px] items-center justify-center gap-2 bg-primary px-6 rounded-[20px] font-bold text-black hover:scale-105 active:scale-95 transition-transform shadow-[0_4px_12px_rgba(212,255,0,0.4)] whitespace-nowrap flex-shrink-0"
+                      className="hidden md:inline-flex h-10 items-center justify-center gap-1.5 bg-primary px-4 rounded-xl text-sm font-bold text-black hover:scale-105 active:scale-95 transition-transform shadow-[0_4px_12px_rgba(212,255,0,0.4)] whitespace-nowrap flex-shrink-0"
                     >
-                      <Plus className="w-5 h-5" />
+                      <Plus className="w-4 h-4" />
                       <span>Tambah Baru</span>
                     </button>
                   </>
                 ) : activeTab === 'files' ? (
                   <>
-                    <div className="relative group w-full md:max-w-[295px]">
-                      <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary w-5 h-5 group-focus-within:text-black transition-colors" />
+                    <div className="relative group w-full md:max-w-[240px]">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary w-4 h-4 group-focus-within:text-black transition-colors" />
                       <input 
                         type="text" 
                         placeholder="Cari file atau grup..." 
                         value={fileSearchQuery}
                         onChange={(e) => setFileSearchQuery(e.target.value)}
-                        className="w-full h-[48px] pl-12 pr-4 rounded-[20px] bg-white border border-transparent focus:border-black focus:outline-none shadow-soft transition-all placeholder:text-gray-400"
+                        className="w-full h-10 pl-9 pr-3 text-sm rounded-xl bg-white border border-transparent focus:border-black focus:outline-none shadow-soft transition-all placeholder:text-gray-400"
                       />
                     </div>
 
@@ -391,18 +391,18 @@ export default function App() {
                     />
                     <button 
                       onClick={() => fileInputRef.current?.click()}
-                      className="hidden md:inline-flex h-[48px] items-center justify-center gap-2 bg-primary px-6 rounded-[20px] font-bold text-black hover:scale-105 active:scale-95 transition-transform shadow-[0_4px_12px_rgba(212,255,0,0.4)] whitespace-nowrap flex-shrink-0"
+                      className="hidden md:inline-flex h-10 items-center justify-center gap-1.5 bg-primary px-4 rounded-xl text-sm font-bold text-black hover:scale-105 active:scale-95 transition-transform shadow-[0_4px_12px_rgba(212,255,0,0.4)] whitespace-nowrap flex-shrink-0"
                     >
-                      <FileUp className="w-5 h-5" />
+                      <FileUp className="w-4 h-4" />
                       <span>Upload File</span>
                     </button>
                   </>
                 ) : activeTab === 'translator' ? (
                   <>
-                    <div className="relative group w-full md:max-w-[295px] flex-shrink-0">
-                      <Languages className="absolute left-4 top-1/2 -translate-y-1/2 text-[#95E1D3] w-5 h-5" />
-                      <div className="w-full h-[48px] pl-12 pr-4 rounded-[20px] bg-white border border-transparent shadow-soft flex items-center">
-                        <span className="font-semibold text-gray-700">AI Translate</span>
+                    <div className="relative group w-full md:max-w-[240px] flex-shrink-0">
+                      <Languages className="absolute left-3 top-1/2 -translate-y-1/2 text-[#95E1D3] w-4 h-4" />
+                      <div className="w-full h-10 pl-9 pr-3 rounded-xl bg-white border border-transparent shadow-soft flex items-center">
+                        <span className="font-semibold text-sm text-gray-700">AI Translate</span>
                       </div>
                     </div>
                   </>
@@ -411,44 +411,44 @@ export default function App() {
             </div>
 
             {/* Mobile Tabs - Below on Mobile */}
-            <div className="flex md:hidden gap-1 bg-white p-1.5 rounded-2xl shadow-sm border border-gray-100">
+            <div className="flex md:hidden gap-1 bg-white p-1 rounded-xl shadow-sm border border-gray-100">
               <button
                 onClick={() => setActiveTab('notes')}
                 className={`
-                  flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold transition-all flex-1 justify-center
+                  flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all flex-1 justify-center
                   ${activeTab === 'notes'
                     ? 'bg-black text-white shadow-sm'
                     : 'text-gray-600 hover:bg-gray-100'
                   }
                 `}
               >
-                <StickyNote className="w-5 h-5" />
+                <StickyNote className="w-4 h-4" />
                 <span>Notes</span>
               </button>
               <button
                 onClick={() => setActiveTab('files')}
                 className={`
-                  flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold transition-all flex-1 justify-center
+                  flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all flex-1 justify-center
                   ${activeTab === 'files'
                     ? 'bg-black text-white shadow-sm'
                     : 'text-gray-600 hover:bg-gray-100'
                   }
                 `}
               >
-                <FileUp className="w-5 h-5" />
+                <FileUp className="w-4 h-4" />
                 <span>Files</span>
               </button>
               <button
                 onClick={() => setActiveTab('translator')}
                 className={`
-                  flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold transition-all flex-1 justify-center
+                  flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all flex-1 justify-center
                   ${activeTab === 'translator'
                     ? 'bg-black text-white shadow-sm'
                     : 'text-gray-600 hover:bg-gray-100'
                   }
                 `}
               >
-                <Languages className="w-5 h-5" />
+                <Languages className="w-4 h-4" />
                 <span>Translate</span>
               </button>
             </div>
@@ -460,21 +460,21 @@ export default function App() {
       {activeTab === 'notes' && !noteSelectionMode && (
         <button 
           onClick={() => { setEditingNote(undefined); setIsModalOpen(true); }}
-          className="md:hidden fixed bottom-6 right-6 w-14 h-14 bg-primary rounded-full shadow-[0_4px_20px_rgba(0,0,0,0.2)] flex items-center justify-center z-40 active:scale-90 transition-transform"
+          className="md:hidden fixed bottom-6 right-6 w-12 h-12 bg-primary rounded-full shadow-[0_4px_20px_rgba(0,0,0,0.2)] flex items-center justify-center z-40 active:scale-90 transition-transform"
         >
-          <Plus className="w-7 h-7 text-black" />
+          <Plus className="w-5 h-5 text-black" />
         </button>
       )}
 
       {/* Main Content */}
       {activeTab === 'notes' ? (
-        <main className="max-w-[1200px] mx-auto px-4 md:px-8 py-8">
+        <main className="max-w-[1200px] mx-auto px-3 md:px-6 py-6">
         
         {/* Desktop Counter + Selection Button */}
-        <div className="hidden md:flex items-center justify-between mb-8">
-          <div className="flex items-center gap-2 text-text-secondary">
-            <Layers className="w-4 h-4" />
-            <span className="font-medium text-sm">
+        <div className="hidden md:flex items-center justify-between mb-6">
+          <div className="flex items-center gap-1.5 text-text-secondary">
+            <Layers className="w-3.5 h-3.5" />
+            <span className="font-medium text-xs">
               Total {notes.length} catatan tersimpan
               {filteredNotes.length !== notes.length && (
                 <span className="ml-1 text-black font-semibold">(Menampilkan {filteredNotes.length} hasil)</span>
@@ -485,19 +485,19 @@ export default function App() {
             </span>
           </div>
           
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             {noteSelectionMode && selectedNotes.size > 0 && (
               <button
                 onClick={handleDeleteSelectedNotes}
-                className="h-10 px-5 bg-red-500 text-white font-bold rounded-xl hover:bg-red-600 active:scale-95 transition-all flex items-center gap-2 shadow-sm"
+                className="h-8 px-4 text-sm bg-red-500 text-white font-bold rounded-lg hover:bg-red-600 active:scale-95 transition-all flex items-center gap-1.5 shadow-sm"
               >
-                <Trash2 className="w-4 h-4" />
+                <Trash2 className="w-3.5 h-3.5" />
                 Hapus ({selectedNotes.size})
               </button>
             )}
             <button
               onClick={toggleNoteSelectionMode}
-              className={`h-10 px-5 font-bold rounded-xl transition-all active:scale-95 shadow-sm ${
+              className={`h-8 px-4 text-sm font-bold rounded-lg transition-all active:scale-95 shadow-sm ${
                 noteSelectionMode 
                   ? 'bg-gray-200 text-gray-700 hover:bg-gray-300' 
                   : 'bg-primary text-black hover:bg-primary/80'
@@ -509,16 +509,16 @@ export default function App() {
         </div>
 
         {noteSelectionMode && (
-          <div className="md:hidden flex items-center justify-between mb-4 px-2">
-            <span className={`text-sm font-medium ${selectedNotes.size > 0 ? 'text-red-500' : 'text-text-secondary'}`}>
+          <div className="md:hidden flex items-center justify-between mb-3 px-1">
+            <span className={`text-xs font-medium ${selectedNotes.size > 0 ? 'text-red-500' : 'text-text-secondary'}`}>
               {selectedNotes.size > 0 ? `${selectedNotes.size} dipilih` : 'Pilih catatan untuk dihapus'}
             </span>
             {selectedNotes.size > 0 && (
               <button
                 onClick={handleDeleteSelectedNotes}
-                className="h-9 px-4 bg-red-500 text-white font-bold rounded-xl active:scale-95 transition-all flex items-center gap-2 shadow-sm"
+                className="h-7 px-3 text-xs bg-red-500 text-white font-bold rounded-lg active:scale-95 transition-all flex items-center gap-1.5 shadow-sm"
               >
-                <Trash2 className="w-4 h-4" />
+                <Trash2 className="w-3.5 h-3.5" />
                 Hapus ({selectedNotes.size})
               </button>
             )}
@@ -526,14 +526,14 @@ export default function App() {
         )}
 
         {filteredNotes.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-center animate-fade-in">
-            <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center mb-6 shadow-soft">
-              <span className="text-4xl">📝</span>
+          <div className="flex flex-col items-center justify-center py-16 text-center animate-fade-in">
+            <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mb-5 shadow-soft">
+              <span className="text-3xl">📝</span>
             </div>
-            <h3 className="text-xl font-bold mb-2">
+            <h3 className="text-lg font-bold mb-1.5">
               {notes.length > 0 ? 'Tidak ditemukan' : 'Belum ada catatan'}
             </h3>
-            <p className="text-text-secondary max-w-md mb-8">
+            <p className="text-text-secondary text-sm max-w-md mb-6">
               {notes.length > 0 
                 ? 'Coba gunakan kata kunci lain atau hapus pencarian.' 
                 : 'Mulai buat catatan pertamamu dan bagikan ide dengan orang lain!'}
@@ -541,7 +541,7 @@ export default function App() {
             {notes.length === 0 && (
               <button 
                 onClick={() => setIsModalOpen(true)}
-                className="bg-black text-white px-8 py-3 rounded-[20px] font-medium hover:bg-gray-800 transition-colors"
+                className="bg-black text-white px-6 py-2.5 text-sm rounded-xl font-medium hover:bg-gray-800 transition-colors"
               >
                 Buat Catatan Pertama
               </button>
@@ -549,14 +549,14 @@ export default function App() {
             {notes.length > 0 && searchQuery && (
               <button 
                 onClick={() => setSearchQuery('')}
-                className="text-black font-semibold hover:underline"
+                className="text-black text-sm font-semibold hover:underline"
               >
                 Hapus Pencarian
               </button>
             )}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredNotes.map((note) => (
               <NoteCard
                 key={note.id}

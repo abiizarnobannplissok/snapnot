@@ -68,7 +68,7 @@ const NoteCardComponent: React.FC<NoteCardProps> = ({
     <div 
       onClick={handleCardClick}
       className={`
-        group relative p-6 rounded-3xl border shadow-soft hover:shadow-hover flex flex-col h-full min-h-[220px]
+        group relative p-4 rounded-2xl border shadow-soft hover:shadow-hover flex flex-col h-full min-h-[165px]
         ${selectionMode ? 'cursor-pointer' : 'transition-all duration-300'}
         ${selectionMode && isSelected ? 'ring-4 ring-red-500/50' : ''}
       `}
@@ -81,7 +81,7 @@ const NoteCardComponent: React.FC<NoteCardProps> = ({
       <button
         onClick={handleToggleClick}
         className={`
-          absolute top-3 right-3 w-6 h-6 rounded-full border-2 
+          absolute top-2.5 right-2.5 w-5 h-5 rounded-full border-2 
           flex items-center justify-center z-10
           ${isSelected 
             ? 'bg-red-500 border-red-500 shadow-lg' 
@@ -90,70 +90,70 @@ const NoteCardComponent: React.FC<NoteCardProps> = ({
         `}
         aria-label={isSelected ? 'Batalkan pilihan' : 'Pilih catatan'}
       >
-        {isSelected && <Check className="w-3.5 h-3.5 text-white" />}
+        {isSelected && <Check className="w-3 h-3 text-white" />}
       </button>
     )}
 
     {isNew && !selectionMode && (
-      <span className="absolute -top-3 -right-3 bg-black text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-md animate-bounce">
+      <span className="absolute -top-2 -right-2 bg-black text-white text-[8px] font-bold px-2 py-0.5 rounded-full shadow-md animate-bounce">
         BARU!
       </span>
     )}
 
-    <div className="flex justify-between items-start mb-4">
-      <h3 className="text-lg font-bold text-black leading-tight line-clamp-2 w-full pr-2">
+    <div className="flex justify-between items-start mb-3">
+      <h3 className="text-base font-bold text-black leading-tight line-clamp-2 w-full pr-2">
         {note.title}
       </h3>
     </div>
 
-    <div className="flex-grow mb-6">
-      <p className="text-text-primary/80 text-base leading-relaxed whitespace-pre-line line-clamp-4 font-normal">
+    <div className="flex-grow mb-4">
+      <p className="text-text-primary/80 text-sm leading-relaxed whitespace-pre-line line-clamp-4 font-normal">
         {note.content}
       </p>
     </div>
 
-    <div className="mt-auto border-t border-black/5 pt-4">
-      <div className="flex items-center justify-between text-xs text-text-secondary/80 font-medium mb-3">
-        <div className="flex items-center gap-1.5" title="Terakhir diedit">
-          <Clock className="w-3.5 h-3.5" />
+    <div className="mt-auto border-t border-black/5 pt-3">
+      <div className="flex items-center justify-between text-[10px] text-text-secondary/80 font-medium mb-2">
+        <div className="flex items-center gap-1" title="Terakhir diedit">
+          <Clock className="w-3 h-3" />
           <span>{formatDate(note.updatedAt)}</span>
         </div>
-        <div className="flex items-center gap-1.5">
-          <User className="w-3.5 h-3.5" />
-          <span className="truncate max-w-[100px]">{note.author}</span>
+        <div className="flex items-center gap-1">
+          <User className="w-3 h-3" />
+          <span className="truncate max-w-[80px]">{note.author}</span>
         </div>
       </div>
 
       {!selectionMode && (
-        <div className="flex items-center justify-end gap-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200">
+        <div className="flex items-center justify-end gap-1.5 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200">
          <button
           onClick={handleCopyClick}
-          className="w-9 h-9 flex items-center justify-center rounded-full bg-white/80 hover:bg-white text-black transition-transform hover:scale-110 shadow-sm"
+          className="w-7 h-7 flex items-center justify-center rounded-full bg-white/80 hover:bg-white text-black transition-transform hover:scale-110 shadow-sm"
           title="Salin isi ke clipboard"
         >
-          <Copy className="w-4 h-4" />
+          <Copy className="w-3.5 h-3.5" />
         </button>
         
         <button
           onClick={handleEditClick}
-          className="w-9 h-9 flex items-center justify-center rounded-full bg-white/80 hover:bg-white text-black transition-transform hover:scale-110 shadow-sm"
+          className="w-7 h-7 flex items-center justify-center rounded-full bg-white/80 hover:bg-white text-black transition-transform hover:scale-110 shadow-sm"
           title="Edit"
         >
-          <Edit2 className="w-4 h-4" />
+          <Edit2 className="w-3.5 h-3.5" />
         </button>
         
         <button
           onClick={handleDeleteConfirm}
           className={`
-            h-9 flex items-center justify-center rounded-full transition-all duration-300 shadow-sm
-            ${isDeleting ? 'w-24 bg-red-500 text-white' : 'w-9 bg-white/80 hover:bg-white text-red-500 hover:scale-110'}
+            h-7 flex items-center justify-center rounded-full transition-all duration-300 shadow-sm
+            ${isDeleting ? 'w-20 bg-red-500 text-white' : 'w-7 bg-white/80 hover:bg-white text-red-500 hover:scale-110'}
           `}
           title={isDeleting ? 'Klik lagi untuk hapus' : 'Hapus'}
         >
           {isDeleting ? (
-            <span className="text-xs font-bold">Yakin?</span>
+            <span className="text-[10px] font-bold">Yakin?</span>
           ) : (
-            <Trash2 className="w-4 h-4" />
+            <Trash2 className="w-3.5 h-3.5" />
           )}
         </button>
         </div>

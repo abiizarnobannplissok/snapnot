@@ -9,19 +9,19 @@ interface ToastProps {
 
 export const Toast: React.FC<ToastProps> = ({ message, type, onClose }) => {
   return (
-    <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[60] animate-slide-down">
+    <div className="fixed top-5 left-1/2 -translate-x-1/2 z-[60] animate-slide-down">
       <div className={`
-        flex items-center gap-3 px-6 py-3 rounded-[20px] shadow-2xl
+        flex items-center gap-2 px-4 py-2.5 rounded-xl shadow-2xl
         ${type === 'success' ? 'bg-black text-white' : 'bg-red-500 text-white'}
       `}>
         {type === 'success' ? (
-          <CheckCircle className="w-5 h-5 text-primary" />
+          <CheckCircle className="w-4 h-4 text-primary" />
         ) : (
-          <AlertCircle className="w-5 h-5 text-white" />
+          <AlertCircle className="w-4 h-4 text-white" />
         )}
-        <span className="font-medium text-sm">{message}</span>
-        <button onClick={onClose} className="ml-2 hover:opacity-70">
-          <X className="w-4 h-4" />
+        <span className="font-medium text-xs">{message}</span>
+        <button onClick={onClose} className="ml-1.5 hover:opacity-70">
+          <X className="w-3.5 h-3.5" />
         </button>
       </div>
     </div>
