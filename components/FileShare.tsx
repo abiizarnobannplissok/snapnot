@@ -130,27 +130,41 @@ export function FileShare({ searchQuery, externalFiles, onExternalFilesProcessed
     try {
       showToast(`📥 Mendownload ${group.fileCount} file...`, 'success');
       
-      // Download all files sequentially using fetch blob
+      const blobUrls: string[] = [];
+      
       for (let i = 0; i < group.files.length; i++) {
         const file = group.files[i];
         
-        const response = await fetch(file.data);
-        const blob = await response.blob();
-        const blobUrl = URL.createObjectURL(blob);
-        
-        const link = document.createElement('a');
-        link.href = blobUrl;
-        link.download = file.name;
-        link.style.display = 'none';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        
-        setTimeout(() => URL.revokeObjectURL(blobUrl), 100);
-        if (i < group.files.length - 1) {
-          await new Promise(resolve => setTimeout(resolve, 500));
+        try {
+          const response = await fetch(file.data);
+          if (!response.ok) {
+            console.error(`Failed to fetch ${file.name}: ${response.status}`);
+            continue;
+          }
+          
+          const blob = await response.blob();
+          const blobUrl = URL.createObjectURL(blob);
+          blobUrls.push(blobUrl);
+          
+          const link = document.createElement('a');
+          link.href = blobUrl;
+          link.download = file.name;
+          link.style.display = 'none';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          
+          if (i < group.files.length - 1) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+          }
+        } catch (fileError) {
+          console.error(`Error downloading ${file.name}:`, fileError);
         }
       }
+      
+      setTimeout(() => {
+        blobUrls.forEach(url => URL.revokeObjectURL(url));
+      }, 2000);
       
       showToast(`✅ ${group.fileCount} file berhasil didownload!`, 'success');
     } catch (error) {
