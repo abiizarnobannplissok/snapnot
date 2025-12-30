@@ -229,7 +229,7 @@ export async function createFileGroup(
     let totalBytes = 0;
     let uploadedCount = 0;
 
-    const BATCH_SIZE = totalFiles <= 5 ? 3 : Math.min(5, Math.ceil(totalFiles / 3));
+    const BATCH_SIZE = Math.min(10, Math.max(3, totalFiles));
     const fileItems: FileItem[] = new Array(totalFiles);
     
     for (let i = 0; i < files.length; i += BATCH_SIZE) {
@@ -293,7 +293,6 @@ export async function addFilesToGroup(
   files: { file: File; extension: string }[]
 ): Promise<void> {
   try {
-    // Get existing group
     const { data: dbGroup, error } = await supabase
       .from('file_groups')
       .select('*')
@@ -306,27 +305,35 @@ export async function addFilesToGroup(
 
     const group = dbToApp(dbGroup);
 
-    // Upload new files to Supabase Storage
-    const newFileItems: FileItem[] = [];
-    let additionalBytes = 0;
+    const BATCH_SIZE = Math.min(10, Math.max(3, files.length));
+    const newFileItems: FileItem[] = new Array(files.length);
 
-    for (const { file, extension } of files) {
-      const publicUrl = await uploadFileToStorage(file, groupId);
-      
-      newFileItems.push({
-        id: `${Date.now()}-${Math.random().toString(36).substring(7)}`,
-        name: file.name,
-        size: formatFileSize(file.size),
-        sizeBytes: file.size,
-        type: file.type,
-        extension: extension,
-        data: publicUrl
+    for (let i = 0; i < files.length; i += BATCH_SIZE) {
+      const batch = files.slice(i, i + BATCH_SIZE);
+      const batchPromises = batch.map(async ({ file, extension }, batchIndex) => {
+        const globalIndex = i + batchIndex;
+        const publicUrl = await uploadFileToStorage(file, groupId);
+        
+        return {
+          index: globalIndex,
+          fileItem: {
+            id: `${Date.now()}-${Math.random().toString(36).substring(7)}`,
+            name: file.name,
+            size: formatFileSize(file.size),
+            sizeBytes: file.size,
+            type: file.type,
+            extension: extension,
+            data: publicUrl
+          }
+        };
       });
-
-      additionalBytes += file.size;
+      
+      const batchResults = await Promise.all(batchPromises);
+      batchResults.forEach(({ index, fileItem }) => {
+        newFileItems[index] = fileItem;
+      });
     }
 
-    // Update group metadata
     const updatedFiles = [...group.files, ...newFileItems];
     const totalBytes = updatedFiles.reduce((sum: number, f: FileItem) => sum + f.sizeBytes, 0);
 
