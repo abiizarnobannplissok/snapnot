@@ -1,0 +1,235 @@
+/* Floating Tab Navigation - Mobile Only */
+.floating-tab-nav {
+  position: fixed;
+  bottom: 16px;
+  left: 50%;
+  z-index: 1000;
+  
+  display: none; /* Hidden by default, shown only on mobile */
+  gap: 16px; /* Increased gap for better spacing */
+  padding: 10px 16px; /* More horizontal padding */
+  
+  /* Apple Glass UI Style */
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(40px) saturate(200%);
+  -webkit-backdrop-filter: blur(40px) saturate(200%);
+  border-radius: 28px;
+  border: 0.5px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.08),
+    0 2px 8px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  
+  /* Positioning and animation */
+  transform: translateX(-50%) translateZ(0);
+  animation: slideUpFadeIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) 0.15s backwards;
+  
+  /* Hardware acceleration */
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+}
+
+/* Show only on mobile screens */
+@media (max-width: 767px) {
+  .floating-tab-nav {
+    display: flex;
+  }
+}
+
+/* Hidden state - smooth slide down animation with scale */
+.floating-tab-nav.hidden {
+  opacity: 0;
+  transform: translateX(-50%) translateY(120px) scale(0.9) translateZ(0);
+  pointer-events: none;
+  transition: 
+    transform 0.45s cubic-bezier(0.4, 0, 0.6, 1),
+    opacity 0.4s ease-out 0.05s;
+}
+
+/* Visible state - smooth slide up animation with bounce */
+.floating-tab-nav:not(.hidden) {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0) scale(1) translateZ(0);
+  pointer-events: auto;
+  transition: 
+    transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
+    opacity 0.4s ease-in;
+}
+
+/* Tab Button Base Style */
+.tab-button {
+  width: 54px;
+  height: 54px;
+  border: none;
+  border-radius: 16px;
+  background: transparent;
+  
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  cursor: pointer;
+  /* Faster transitions for instant feel */
+  transition: 
+    transform 0.15s cubic-bezier(0.2, 0, 0, 1),
+    background-color 0.15s ease,
+    box-shadow 0.15s ease;
+  
+  /* Remove tap highlight on mobile */
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  user-select: none;
+  
+  /* Hardware acceleration */
+  will-change: transform, background-color;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Tab Icon */
+.tab-icon {
+  color: #666666;
+  /* Instant color change for snappy feel */
+  transition: color 0.1s ease;
+}
+
+/* Active State */
+.tab-button.active {
+  background: #D4FF00; /* Neon Yellow */
+  transform: scale(1.08) translateZ(0);
+  box-shadow: 
+    0 4px 16px rgba(212, 255, 0, 0.35),
+    0 2px 8px rgba(212, 255, 0, 0.2);
+}
+
+.tab-button.active .tab-icon {
+  color: #000000; /* Black */
+}
+
+/* Hover State (for devices with hover capability) */
+@media (hover: hover) and (pointer: fine) {
+  .tab-button:hover {
+    transform: scale(1.05) translateZ(0);
+    background: rgba(0, 0, 0, 0.03);
+  }
+  
+  .tab-button.active:hover {
+    transform: scale(1.1) translateZ(0);
+  }
+}
+
+/* Press/Active State - Instant feedback */
+.tab-button:active {
+  transform: scale(0.92) translateZ(0);
+  transition: transform 0.08s ease;
+}
+
+/* Focus State (Accessibility) */
+.tab-button:focus-visible {
+  outline: 2px solid #8FB4FF;
+  outline-offset: 2px;
+}
+
+/* Entrance Animation */
+@keyframes slideUpFadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* Safe area for iOS devices */
+@supports (padding: env(safe-area-inset-bottom)) {
+  .floating-tab-nav {
+    bottom: max(16px, calc(env(safe-area-inset-bottom) + 8px));
+  }
+}
+
+/* Enhanced Apple Glass Effect */
+@supports (backdrop-filter: blur(40px)) or (-webkit-backdrop-filter: blur(40px)) {
+  .floating-tab-nav {
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(40px) saturate(200%) brightness(1.05);
+    -webkit-backdrop-filter: blur(40px) saturate(200%) brightness(1.05);
+    border: 0.5px solid rgba(255, 255, 255, 0.6);
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.08),
+      0 2px 8px rgba(0, 0, 0, 0.04),
+      inset 0 1px 0 rgba(255, 255, 255, 0.9),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.02);
+  }
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .floating-tab-nav {
+    animation: none;
+    transition: none;
+  }
+  
+  .tab-button {
+    transition: none;
+  }
+  
+  .tab-icon {
+    transition: none;
+  }
+}
+
+/* Dark mode support - Apple style */
+@media (prefers-color-scheme: dark) {
+  .floating-tab-nav {
+    background: rgba(30, 30, 30, 0.75);
+    border: 0.5px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.5),
+      0 2px 8px rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+  
+  .tab-icon {
+    color: #CCCCCC;
+  }
+  
+  .tab-button.active .tab-icon {
+    color: #000000; /* Keep black on yellow */
+  }
+  
+  @supports (backdrop-filter: blur(40px)) or (-webkit-backdrop-filter: blur(40px)) {
+    .floating-tab-nav {
+      backdrop-filter: blur(40px) saturate(200%) brightness(0.85);
+      -webkit-backdrop-filter: blur(40px) saturate(200%) brightness(0.85);
+    }
+  }
+}
+
+/* Handle landscape mode on mobile */
+@media (max-width: 767px) and (orientation: landscape) {
+  .floating-tab-nav {
+    bottom: 8px;
+    padding: 6px 12px;
+    gap: 12px;
+  }
+  
+  .tab-button {
+    width: 48px;
+    height: 48px;
+  }
+}
+
+/* Extra small devices */
+@media (max-width: 360px) {
+  .floating-tab-nav {
+    padding: 8px 12px;
+    gap: 12px; /* Keep decent spacing even on small screens */
+  }
+  
+  .tab-button {
+    width: 48px;
+    height: 48px;
+  }
+}
