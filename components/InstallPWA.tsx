@@ -63,29 +63,29 @@ export const InstallPWA: React.FC = () => {
   }
 
   return (
-    <div className="fixed bottom-5 left-3 right-3 md:left-auto md:right-5 md:w-80 z-50 animate-scale-in">
-      <div className="bg-white rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.12)] p-3 border border-gray-100">
-        <div className="flex items-start gap-2.5">
-          <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center flex-shrink-0">
+    <div className="fixed bottom-5 left-4 right-4 md:left-auto md:right-5 md:w-80 z-50 animate-scale-in">
+      <div className="bg-white rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.12)] p-4 border border-gray-100">
+        <div className="flex items-start gap-3">
+          <div className="w-11 h-11 bg-primary rounded-xl flex items-center justify-center flex-shrink-0">
             <Download className="w-5 h-5 text-black" />
           </div>
           
           <div className="flex-1 min-w-0">
-            <h3 className="font-bold text-sm mb-0.5">Install SnapNotes</h3>
-            <p className="text-xs text-gray-600 mb-2.5">
+            <h3 className="font-bold text-base mb-1">Install SnapNotes</h3>
+            <p className="text-sm text-gray-600 mb-3">
               Install aplikasi untuk akses lebih cepat dan pengalaman lebih baik!
             </p>
             
-            <div className="flex gap-1.5">
+            <div className="flex gap-2">
               <button
                 onClick={handleInstallClick}
-                className="flex-1 bg-black text-white px-3 py-1.5 rounded-lg font-semibold text-xs hover:bg-gray-800 transition-colors"
+                className="flex-1 bg-black text-white px-4 py-2 rounded-xl font-semibold text-sm hover:bg-gray-800 transition-colors"
               >
                 Install
               </button>
               <button
                 onClick={handleDismiss}
-                className="px-3 py-1.5 rounded-lg font-semibold text-xs text-gray-600 hover:bg-gray-100 transition-colors"
+                className="px-4 py-2 rounded-xl font-semibold text-sm text-gray-600 hover:bg-gray-100 transition-colors"
               >
                 Nanti
               </button>
@@ -96,7 +96,7 @@ export const InstallPWA: React.FC = () => {
             onClick={handleDismiss}
             className="text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0"
           >
-            <X className="w-4 h-4" />
+            <X className="w-5 h-5" />
           </button>
         </div>
       </div>

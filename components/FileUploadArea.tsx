@@ -114,8 +114,8 @@ export function FileUploadArea({ onUpload, loading = false, externalFiles = [], 
   };
 
   return (
-    <div className="bg-white rounded-2xl p-4 md:p-6 shadow-soft border-2 border-gray-100">
-      <h2 className="text-xl font-bold mb-4">Upload File</h2>
+    <div className="bg-white rounded-2xl p-5 md:p-7 shadow-soft border-2 border-gray-100">
+      <h2 className="text-2xl font-bold mb-5">Upload File</h2>
       
       {/* Upload Zone */}
       <div
@@ -125,7 +125,7 @@ export function FileUploadArea({ onUpload, loading = false, externalFiles = [], 
         onDrop={handleDrop}
         onClick={() => !loading && fileInputRef.current?.click()}
         className={`
-          relative border-2 border-dashed rounded-xl p-10 text-center cursor-pointer
+          relative border-2 border-dashed rounded-2xl p-12 text-center cursor-pointer
           transition-all duration-200
           ${isDragging 
             ? 'border-primary bg-primary/10' 
@@ -144,20 +144,20 @@ export function FileUploadArea({ onUpload, loading = false, externalFiles = [], 
         />
         
         <div className="flex flex-col items-center">
-          <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center mb-3">
-            <Upload className="w-6 h-6 text-black" />
+          <div className="w-14 h-14 rounded-full bg-primary/20 flex items-center justify-center mb-4">
+            <Upload className="w-7 h-7 text-black" />
           </div>
-          <h3 className="text-base font-bold mb-1.5">Unggah File</h3>
-          <p className="text-gray-600 text-sm mb-3">Klik atau Tarik File ke Sini!</p>
-          <p className="text-xs text-gray-400">
+          <h3 className="text-lg font-bold mb-2">Unggah File</h3>
+          <p className="text-gray-600 text-base mb-4">Klik atau Tarik File ke Sini!</p>
+          <p className="text-sm text-gray-400">
             Maks 1GB per file • Cloudflare R2 Storage • Gratis selamanya!
           </p>
         </div>
       </div>
 
       {/* Input Field - Nama Grup */}
-      <div className="mt-4">
-        <label className="block text-xs font-semibold mb-1.5">
+      <div className="mt-5">
+        <label className="block text-sm font-semibold mb-2">
           Nama Grup <span className="text-gray-400 font-normal">(Opsional)</span>
         </label>
         <input
@@ -166,38 +166,38 @@ export function FileUploadArea({ onUpload, loading = false, externalFiles = [], 
           onChange={(e) => setGroupName(e.target.value)}
           placeholder="A"
           disabled={loading}
-          className="w-full h-10 px-3 text-sm rounded-lg border-2 border-gray-200 focus:border-black focus:outline-none transition-colors disabled:bg-gray-50 disabled:cursor-not-allowed"
+          className="w-full h-11 px-4 text-base rounded-xl border-2 border-gray-200 focus:border-black focus:outline-none transition-colors disabled:bg-gray-50 disabled:cursor-not-allowed"
         />
       </div>
 
       {/* File Preview List */}
       {selectedFiles.length > 0 && (
-        <div className="mt-4">
-          <h3 className="font-semibold text-sm mb-2">File yang Dipilih ({selectedFiles.length})</h3>
-          <div className="space-y-1.5 max-h-56 overflow-y-auto">
+        <div className="mt-5">
+          <h3 className="font-semibold text-base mb-3">File yang Dipilih ({selectedFiles.length})</h3>
+          <div className="space-y-2 max-h-64 overflow-y-auto">
             {selectedFiles.map((preview, index) => {
               const extension = getFileExtension(preview.file.name);
               return (
                 <div
                   key={preview.id}
-                  className={`flex items-center gap-2.5 p-2.5 rounded-lg transition-all ${
+                  className={`flex items-center gap-3 p-3 rounded-xl transition-all ${
                     preview.uploaded 
                       ? 'bg-green-50 border-2 border-green-200' 
                       : 'bg-gray-50'
                   }`}
                 >
-                  <FileIcon extension={extension} className="w-4 h-4 flex-shrink-0" />
+                  <FileIcon extension={extension} className="w-5 h-5 flex-shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <p className={`text-xs font-medium truncate ${
+                    <p className={`text-sm font-medium truncate ${
                       preview.uploaded ? 'text-green-700' : ''
                     }`}>
                       {preview.file.name}
                     </p>
-                    <p className="text-[10px] text-gray-500">{formatFileSize(preview.file.size)}</p>
+                    <p className="text-xs text-gray-500">{formatFileSize(preview.file.size)}</p>
                   </div>
                   
                   {preview.uploaded ? (
-                    <div className="w-6 h-6 flex items-center justify-center bg-green-500 rounded-full">
+                    <div className="w-7 h-7 flex items-center justify-center bg-green-500 rounded-full">
                       <CheckCircle className="w-4 h-4 text-white" />
                     </div>
                   ) : (
@@ -207,7 +207,7 @@ export function FileUploadArea({ onUpload, loading = false, externalFiles = [], 
                         removeFile(preview.id);
                       }}
                       disabled={loading || isUploading}
-                      className="p-1 hover:bg-red-100 rounded-lg transition-colors disabled:opacity-50"
+                      className="p-1.5 hover:bg-red-100 rounded-xl transition-colors disabled:opacity-50"
                     >
                       <X className="w-4 h-4 text-red-500" />
                     </button>
@@ -223,12 +223,12 @@ export function FileUploadArea({ onUpload, loading = false, externalFiles = [], 
       {selectedFiles.length > 0 && (
         <div>
           {isUploading && (
-            <div className="mt-4 mb-3 space-y-1.5 p-3 bg-blue-50 rounded-lg border-2 border-blue-200">
-              <div className="flex items-center justify-between text-xs">
+            <div className="mt-5 mb-4 space-y-2 p-4 bg-blue-50 rounded-xl border-2 border-blue-200">
+              <div className="flex items-center justify-between text-sm">
                 <span className="font-semibold text-gray-700">Upload Progress</span>
-                <span className="font-bold text-black text-base">{Math.round(uploadProgress)}%</span>
+                <span className="font-bold text-black text-lg">{Math.round(uploadProgress)}%</span>
               </div>
-              <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden shadow-inner">
+              <div className="w-full h-3.5 bg-gray-200 rounded-full overflow-hidden shadow-inner">
                 <div 
                   className="h-full bg-gradient-to-r from-blue-500 to-blue-600 transition-all duration-300 ease-out relative"
                   style={{ width: `${uploadProgress}%` }}
@@ -236,7 +236,7 @@ export function FileUploadArea({ onUpload, loading = false, externalFiles = [], 
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer" />
                 </div>
               </div>
-              <p className="text-[10px] text-gray-600 text-center font-medium">
+              <p className="text-xs text-gray-600 text-center font-medium">
                 Uploading {selectedFiles.length} file{selectedFiles.length > 1 ? 's' : ''}...
               </p>
             </div>
@@ -245,11 +245,11 @@ export function FileUploadArea({ onUpload, loading = false, externalFiles = [], 
           <button
           onClick={handleUpload}
           disabled={loading || isUploading}
-          className="w-full mt-4 h-10 bg-primary text-black text-sm font-bold rounded-lg hover:bg-primary/80 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5 shadow-[0_4px_12px_rgba(212,255,0,0.4)]"
+          className="w-full mt-5 h-11 bg-primary text-black text-base font-bold rounded-xl hover:bg-primary/80 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-[0_4px_12px_rgba(212,255,0,0.4)]"
         >
           {loading || isUploading ? (
             <>
-              <Loader2 className="w-4 h-4 animate-spin" />
+              <Loader2 className="w-5 h-5 animate-spin" />
               <span>Mengupload...</span>
             </>
           ) : (

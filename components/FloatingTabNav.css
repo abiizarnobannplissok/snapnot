@@ -1,19 +1,19 @@
 /* Floating Tab Navigation - Mobile Only */
 .floating-tab-nav {
   position: fixed;
-  bottom: 12px;
+  bottom: 14px;
   left: 50%;
   z-index: 1000;
   
   display: none; /* Hidden by default, shown only on mobile */
-  gap: 12px;
-  padding: 8px 12px;
+  gap: 14px;
+  padding: 10px 14px;
   
   /* Apple Glass UI Style */
   background: rgba(255, 255, 255, 0.72);
   backdrop-filter: blur(40px) saturate(200%);
   -webkit-backdrop-filter: blur(40px) saturate(200%);
-  border-radius: 22px;
+  border-radius: 24px;
   border: 0.5px solid rgba(255, 255, 255, 0.5);
   box-shadow: 
     0 8px 32px rgba(0, 0, 0, 0.08),
@@ -58,10 +58,10 @@
 
 /* Tab Button Base Style */
 .tab-button {
-  width: 44px;
-  height: 44px;
+  width: 48px;
+  height: 48px;
   border: none;
-  border-radius: 12px;
+  border-radius: 14px;
   background: transparent;
   
   display: flex;
@@ -145,7 +145,7 @@
 /* Safe area for iOS devices */
 @supports (padding: env(safe-area-inset-bottom)) {
   .floating-tab-nav {
-    bottom: max(16px, calc(env(safe-area-inset-bottom) + 8px));
+    bottom: max(18px, calc(env(safe-area-inset-bottom) + 10px));
   }
 }
 
@@ -210,26 +210,26 @@
 /* Handle landscape mode on mobile */
 @media (max-width: 767px) and (orientation: landscape) {
   .floating-tab-nav {
-    bottom: 6px;
-    padding: 5px 10px;
-    gap: 10px;
+    bottom: 8px;
+    padding: 6px 12px;
+    gap: 12px;
   }
   
   .tab-button {
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
   }
 }
 
 /* Extra small devices */
 @media (max-width: 360px) {
   .floating-tab-nav {
-    padding: 6px 10px;
-    gap: 10px; /* Keep decent spacing even on small screens */
+    padding: 8px 12px;
+    gap: 12px; /* Keep decent spacing even on small screens */
   }
   
   .tab-button {
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
   }
 }

@@ -111,11 +111,11 @@ export const ApiKeyConfig: React.FC<ApiKeyConfigProps> = ({
   };
 
   return (
-    <div className="bg-white rounded-xl p-4 md:p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08)] border border-[#E5E5E5]">
-      <div className="flex flex-col gap-3">
+    <div className="bg-white rounded-2xl p-5 md:p-7 shadow-[0_2px_8px_rgba(0,0,0,0.08)] border border-[#E5E5E5]">
+      <div className="flex flex-col gap-4">
         {/* Label and Status */}
         <div className="flex items-center justify-between">
-          <label htmlFor="api-key" className="text-xs font-semibold text-black">
+          <label htmlFor="api-key" className="text-sm font-semibold text-black">
             DeepL API Key
           </label>
           {getStatusDisplay()}
@@ -129,57 +129,57 @@ export const ApiKeyConfig: React.FC<ApiKeyConfigProps> = ({
             value={apiKey}
             onChange={(e) => setApiKey(e.target.value)}
             placeholder="sk-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-            className="w-full h-10 px-3 pr-10 rounded-lg border border-[#CCCCCC] focus:border-[#95E1D3] focus:outline-none text-sm transition-colors"
+            className="w-full h-11 px-4 pr-11 rounded-xl border border-[#CCCCCC] focus:border-[#95E1D3] focus:outline-none text-base transition-colors"
             aria-label="DeepL API key input"
           />
           <button
             type="button"
             onClick={() => setShowKey(!showKey)}
-            className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-[#666666] hover:text-black transition-colors"
+            className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-[#666666] hover:text-black transition-colors"
             aria-label={showKey ? 'Hide API key' : 'Show API key'}
           >
-            {showKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            {showKey ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
           </button>
         </div>
 
         {/* Error Message */}
         {errorMessage && (
-          <div className="text-[#EF4444] text-xs flex items-center gap-1.5">
-            <AlertCircle className="w-3.5 h-3.5" />
+          <div className="text-[#EF4444] text-sm flex items-center gap-2">
+            <AlertCircle className="w-4 h-4" />
             <span>{errorMessage}</span>
           </div>
         )}
 
         {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row gap-1.5">
+        <div className="flex flex-col sm:flex-row gap-2">
           <button
             onClick={handleSaveKey}
-            className="flex-1 h-9 bg-[#95E1D3] text-black text-sm font-medium rounded-lg hover:bg-[#81CABB] active:scale-[0.98] transition-all"
+            className="flex-1 h-10 bg-[#95E1D3] text-black text-sm font-medium rounded-xl hover:bg-[#81CABB] active:scale-[0.98] transition-all"
           >
             Save Key
           </button>
           <button
             onClick={handleTestConnection}
             disabled={status === 'testing'}
-            className="flex-1 h-9 bg-white text-black text-sm font-medium rounded-lg border-2 border-[#95E1D3] hover:bg-[#F5F5F5] active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 h-10 bg-white text-black text-sm font-medium rounded-xl border-2 border-[#95E1D3] hover:bg-[#F5F5F5] active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Test Connection
           </button>
         </div>
 
         {/* Helper Text */}
-        <div className="flex flex-col gap-1.5">
-          <p className="text-[10px] text-[#666666]">
+        <div className="flex flex-col gap-2">
+          <p className="text-xs text-[#666666]">
             API key disimpan lokal di browser Anda, tidak dibagikan
           </p>
           <a
             href="https://www.deepl.com/pro-api"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[10px] text-[#95E1D3] hover:text-[#81CABB] font-medium flex items-center gap-1 transition-colors"
+            className="text-xs text-[#95E1D3] hover:text-[#81CABB] font-medium flex items-center gap-1.5 transition-colors"
           >
             <span>Dapatkan API Key Gratis</span>
-            <ExternalLink className="w-2.5 h-2.5" />
+            <ExternalLink className="w-3 h-3" />
           </a>
         </div>
       </div>

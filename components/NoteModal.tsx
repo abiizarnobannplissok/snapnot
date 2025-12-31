@@ -71,37 +71,37 @@ export const NoteModal: React.FC<NoteModalProps> = ({ isOpen, onClose, onSave, i
       {/* Modal Content */}
       <div 
         className={`
-          relative w-full max-w-lg bg-white rounded-t-2xl md:rounded-2xl p-4 md:p-6 
+          relative w-full max-w-lg bg-white rounded-t-2xl md:rounded-2xl p-5 md:p-7 
           shadow-2xl flex flex-col max-h-[90vh] overflow-y-auto no-scrollbar
           transform transition-transform duration-300 ease-out
           ${isClosing ? 'translate-y-full md:translate-y-10 md:opacity-0' : 'translate-y-0 opacity-100'}
         `}
       >
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold">
+        <div className="flex justify-between items-center mb-5">
+          <h2 className="text-2xl font-bold">
             {initialData ? 'Edit Catatan' : 'Buat Catatan'}
           </h2>
           <button 
             onClick={handleClose}
-            className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
+            className="w-9 h-9 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
           >
-            <X className="w-4 h-4 text-gray-600" />
+            <X className="w-5 h-5 text-gray-600" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-5">
           {/* Color Picker */}
           <div>
-            <label className="block text-xs font-semibold text-text-secondary mb-2">
+            <label className="block text-sm font-semibold text-text-secondary mb-2.5">
               Pilih Warna - <span className="text-black font-bold">{COLORS[formData.color]?.label || 'Neon'}</span>
             </label>
-            <div className="grid grid-cols-5 gap-2">
+            <div className="grid grid-cols-5 gap-2.5">
               {COLOR_OPTIONS.map((color) => (
                 <button
                   key={color}
                   type="button"
                   onClick={() => setFormData({ ...formData, color })}
-                  className="relative w-full aspect-square rounded-xl border-3 flex items-center justify-center transition-all hover:scale-105 hover:shadow-md active:scale-95"
+                  className="relative w-full aspect-square rounded-2xl border-3 flex items-center justify-center transition-all hover:scale-105 hover:shadow-md active:scale-95"
                   style={{
                     backgroundColor: COLORS[color].hex,
                     borderWidth: '2px',
@@ -112,12 +112,12 @@ export const NoteModal: React.FC<NoteModalProps> = ({ isOpen, onClose, onSave, i
                 >
                   {formData.color === color && (
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="w-5 h-5 bg-black/80 rounded-full flex items-center justify-center">
-                        <Check className="w-3 h-3 text-white" />
+                      <div className="w-6 h-6 bg-black/80 rounded-full flex items-center justify-center">
+                        <Check className="w-3.5 h-3.5 text-white" />
                       </div>
                     </div>
                   )}
-                  <span className="absolute bottom-0.5 text-[8px] font-bold text-black/70">
+                  <span className="absolute bottom-1 text-[9px] font-bold text-black/70">
                     {COLORS[color].label}
                   </span>
                 </button>
@@ -125,14 +125,14 @@ export const NoteModal: React.FC<NoteModalProps> = ({ isOpen, onClose, onSave, i
             </div>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-4">
             <div>
               <input
                 type="text"
                 placeholder="Judul Catatan..."
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                className="w-full text-lg font-bold placeholder:text-gray-300 border-b border-gray-100 pb-2 focus:border-black focus:outline-none transition-colors"
+                className="w-full text-xl font-bold placeholder:text-gray-300 border-b border-gray-100 pb-3 focus:border-black focus:outline-none transition-colors"
                 autoFocus
                 required
               />
@@ -143,35 +143,35 @@ export const NoteModal: React.FC<NoteModalProps> = ({ isOpen, onClose, onSave, i
                 placeholder="Tulis sesuatu..."
                 value={formData.content}
                 onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                className="w-full min-h-[120px] resize-none text-sm leading-relaxed placeholder:text-gray-300 focus:outline-none"
+                className="w-full min-h-[140px] resize-none text-base leading-relaxed placeholder:text-gray-300 focus:outline-none"
                 required
               />
             </div>
 
             <div>
-               <label className="block text-[10px] font-semibold text-text-secondary mb-1">Nama Penulis (Opsional)</label>
+               <label className="block text-xs font-semibold text-text-secondary mb-1.5">Nama Penulis (Opsional)</label>
                <input
                 type="text"
                 placeholder="Abiizar"
                 value={formData.author}
                 onChange={(e) => setFormData({ ...formData, author: e.target.value })}
-                className="w-full bg-gray-50 px-3 py-2 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-black/5"
+                className="w-full bg-gray-50 px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black/5"
               />
             </div>
           </div>
 
-          <div className="flex gap-2 pt-3 border-t border-gray-100">
+          <div className="flex gap-3 pt-4 border-t border-gray-100">
             <button
               type="button"
               onClick={handleClose}
-              className="flex-1 px-4 py-2.5 rounded-xl text-sm font-semibold border border-gray-200 hover:bg-gray-50 text-text-secondary transition-colors"
+              className="flex-1 px-5 py-3 rounded-2xl text-sm font-semibold border border-gray-200 hover:bg-gray-50 text-text-secondary transition-colors"
             >
               Batal
             </button>
             <button
               type="submit"
               disabled={!formData.title.trim() || !formData.content.trim()}
-              className="flex-1 px-4 py-2.5 rounded-xl text-sm font-semibold bg-black text-white hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="flex-1 px-5 py-3 rounded-2xl text-sm font-semibold bg-black text-white hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               Simpan
             </button>

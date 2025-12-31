@@ -63,31 +63,31 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   };
 
   return (
-    <div className="flex flex-col gap-1.5 flex-1" ref={dropdownRef}>
-      <label className="text-xs font-medium text-[#666666]">{label}</label>
+    <div className="flex flex-col gap-2 flex-1" ref={dropdownRef}>
+      <label className="text-sm font-medium text-[#666666]">{label}</label>
       
       {/* Selector Button */}
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="relative w-full h-10 px-3 rounded-lg border border-[#E5E5E5] hover:border-[#95E1D3] focus:border-[#95E1D3] focus:outline-none transition-colors bg-white flex items-center justify-between gap-2"
+        className="relative w-full h-11 px-4 rounded-xl border border-[#E5E5E5] hover:border-[#95E1D3] focus:border-[#95E1D3] focus:outline-none transition-colors bg-white flex items-center justify-between gap-3"
         aria-label={ariaLabel || label}
         aria-expanded={isOpen}
         aria-haspopup="listbox"
       >
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <span className="text-xl">{selectedLang?.flag}</span>
-          <span className="text-sm font-medium text-black">{selectedLang?.name}</span>
+          <span className="text-base font-medium text-black">{selectedLang?.name}</span>
         </div>
-        <ChevronDown className={`w-4 h-4 text-[#666666] transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        <ChevronDown className={`w-5 h-5 text-[#666666] transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute z-50 mt-[58px] w-full max-w-[calc(100%-2rem)] md:max-w-[360px] bg-white rounded-lg shadow-[0_8px_24px_rgba(0,0,0,0.12)] border border-[#E5E5E5] p-1.5 animate-slide-down">
+        <div className="absolute z-50 mt-[62px] w-full max-w-[calc(100%-2rem)] md:max-w-[360px] bg-white rounded-xl shadow-[0_8px_24px_rgba(0,0,0,0.12)] border border-[#E5E5E5] p-2 animate-slide-down">
           {/* Search Input */}
-          <div className="relative mb-1.5">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#666666]" />
+          <div className="relative mb-2">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#666666]" />
             <input
               ref={searchInputRef}
               type="text"
@@ -95,13 +95,13 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Cari bahasa..."
-              className="w-full h-8 pl-8 pr-2.5 rounded-md border border-[#E5E5E5] focus:border-[#95E1D3] focus:outline-none text-xs"
+              className="w-full h-9 pl-9 pr-3 rounded-lg border border-[#E5E5E5] focus:border-[#95E1D3] focus:outline-none text-sm"
               aria-label="Search languages"
             />
           </div>
 
           {/* Language List */}
-          <div className="max-h-[260px] overflow-y-auto custom-scrollbar" role="listbox">
+          <div className="max-h-[280px] overflow-y-auto custom-scrollbar" role="listbox">
             {filteredLanguages.length > 0 ? (
               filteredLanguages.map((lang) => (
                 <button
@@ -109,7 +109,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
                   type="button"
                   onClick={() => handleSelect(lang.code)}
                   className={`
-                    w-full h-9 px-2.5 rounded-md flex items-center gap-2.5 transition-colors
+                    w-full h-10 px-3 rounded-lg flex items-center gap-3 transition-colors
                     ${lang.code === selectedLanguage
                       ? 'bg-[#95E1D3] text-black'
                       : 'hover:bg-[#F5F5F5] text-black'
@@ -119,14 +119,14 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
                   aria-selected={lang.code === selectedLanguage}
                 >
                   <span className="text-lg">{lang.flag}</span>
-                  <span className="text-xs font-medium flex-1 text-left">{lang.name}</span>
-                  <span className={`text-[10px] ${lang.code === selectedLanguage ? 'text-black' : 'text-[#999999]'}`}>
+                  <span className="text-sm font-medium flex-1 text-left">{lang.name}</span>
+                  <span className={`text-xs ${lang.code === selectedLanguage ? 'text-black' : 'text-[#999999]'}`}>
                     {lang.code === 'auto' ? '' : lang.code}
                   </span>
                 </button>
               ))
             ) : (
-              <div className="py-6 text-center text-[#666666] text-xs">
+              <div className="py-8 text-center text-[#666666] text-sm">
                 Tidak ada bahasa ditemukan
               </div>
             )}

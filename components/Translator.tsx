@@ -174,23 +174,23 @@ export const Translator: React.FC<TranslatorProps> = ({ onShowToast }) => {
   }, [canTranslate, sourceLang, sourceText, targetText]);
 
   return (
-    <div className="max-w-[1200px] mx-auto px-3 md:px-6 py-6">
+    <div className="max-w-[1200px] mx-auto px-4 md:px-6 py-8">
       {/* Hero Section */}
-      <div className="text-center mb-6 md:mb-8">
-        <div className="flex items-center justify-center gap-2 mb-3">
-          <Languages className="w-10 h-10 text-[#95E1D3]" />
+      <div className="text-center mb-8 md:mb-10">
+        <div className="flex items-center justify-center gap-3 mb-4">
+          <Languages className="w-12 h-12 text-[#95E1D3]" />
         </div>
-        <h1 className="text-3xl md:text-4xl font-bold mb-2">AI Text Translator</h1>
-        <p className="text-base text-[#666666] mb-3">
+        <h1 className="text-4xl md:text-5xl font-bold mb-3">AI Text Translator</h1>
+        <p className="text-lg text-[#666666] mb-4">
           Translate text dengan akurasi tinggi menggunakan DeepL
         </p>
-        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#95E1D3]/10 rounded-full text-xs font-medium text-[#2C7A6B]">
+        <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#95E1D3]/10 rounded-full text-sm font-medium text-[#2C7A6B]">
           <span>Powered by DeepL</span>
         </div>
       </div>
 
       {/* API Key Configuration */}
-      <div className="mb-6">
+      <div className="mb-8">
         <ApiKeyConfig
           onApiKeyChange={setApiKey}
           onValidationStatusChange={setIsApiKeyValid}
@@ -199,17 +199,17 @@ export const Translator: React.FC<TranslatorProps> = ({ onShowToast }) => {
 
       {/* Empty State when no API key */}
       {!apiKey && (
-        <div className="bg-white rounded-xl p-10 text-center shadow-[0_4px_16px_rgba(0,0,0,0.08)] border border-[#E5E5E5]">
-          <div className="text-5xl mb-3">🔑</div>
-          <h3 className="text-xl font-semibold mb-2">API Key Required</h3>
-          <p className="text-[#666666] text-sm mb-5 max-w-md mx-auto">
+        <div className="bg-white rounded-2xl p-12 text-center shadow-[0_4px_16px_rgba(0,0,0,0.08)] border border-[#E5E5E5]">
+          <div className="text-6xl mb-4">🔑</div>
+          <h3 className="text-2xl font-semibold mb-3">API Key Required</h3>
+          <p className="text-[#666666] text-base mb-6 max-w-md mx-auto">
             Please enter your DeepL API key above to start translating
           </p>
           <a
             href="https://www.deepl.com/pro-api"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 px-5 py-2.5 text-sm bg-[#95E1D3] text-black font-medium rounded-lg hover:bg-[#81CABB] transition-colors"
+            className="inline-flex items-center gap-2 px-6 py-3 text-base bg-[#95E1D3] text-black font-medium rounded-xl hover:bg-[#81CABB] transition-colors"
           >
             Get Free API Key
           </a>
@@ -218,9 +218,9 @@ export const Translator: React.FC<TranslatorProps> = ({ onShowToast }) => {
 
       {/* Main Translator */}
       {apiKey && (
-        <div className="bg-white rounded-xl p-4 md:p-6 shadow-[0_4px_16px_rgba(0,0,0,0.08)] border border-[#E5E5E5]">
+        <div className="bg-white rounded-2xl p-5 md:p-7 shadow-[0_4px_16px_rgba(0,0,0,0.08)] border border-[#E5E5E5]">
           {/* Language Selection */}
-          <div className="flex flex-col md:flex-row items-stretch md:items-end gap-3 mb-4">
+          <div className="flex flex-col md:flex-row items-stretch md:items-end gap-4 mb-5">
             <LanguageSelector
               languages={SOURCE_LANGUAGES}
               selectedLanguage={sourceLang}
@@ -235,7 +235,7 @@ export const Translator: React.FC<TranslatorProps> = ({ onShowToast }) => {
               onClick={handleSwapLanguages}
               disabled={sourceLang === 'auto'}
               className={`
-                md:mb-[22px] h-10 w-10 mx-auto md:mx-0 rounded-full flex items-center justify-center transition-all
+                md:mb-[22px] h-11 w-11 mx-auto md:mx-0 rounded-full flex items-center justify-center transition-all
                 ${sourceLang === 'auto'
                   ? 'bg-[#E5E5E5] text-[#999999] cursor-not-allowed'
                   : 'bg-[#F5F5F5] text-black hover:bg-[#95E1D3] hover:text-black active:rotate-180'
@@ -244,7 +244,7 @@ export const Translator: React.FC<TranslatorProps> = ({ onShowToast }) => {
               style={{ transition: 'all 0.3s ease' }}
               aria-label="Swap languages"
             >
-              <ArrowLeftRight className="w-4 h-4" />
+              <ArrowLeftRight className="w-5 h-5" />
             </button>
 
             <LanguageSelector
@@ -258,25 +258,25 @@ export const Translator: React.FC<TranslatorProps> = ({ onShowToast }) => {
 
           {/* Detected Language Info */}
           {detectedLanguage && sourceLang === 'auto' && (
-            <div className="mb-3 flex items-center gap-1.5 text-xs text-[#666666]">
-              <AlertCircle className="w-3.5 h-3.5" />
+            <div className="mb-4 flex items-center gap-2 text-sm text-[#666666]">
+              <AlertCircle className="w-4 h-4" />
               <span>Detected language: {detectedLanguage}</span>
             </div>
           )}
 
           {/* Text Areas */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
             {/* Source Textarea */}
             <div className="relative">
-              <div className="flex items-center justify-between mb-1.5">
-                <label className="text-xs font-medium text-[#666666]">
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-sm font-medium text-[#666666]">
                   Source Text
                 </label>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
                   <button
                     type="button"
                     onClick={handlePasteText}
-                    className="text-[10px] text-[#95E1D3] hover:text-[#81CABB] font-medium transition-colors"
+                    className="text-xs text-[#95E1D3] hover:text-[#81CABB] font-medium transition-colors"
                     aria-label="Paste from clipboard"
                   >
                     📋 Paste
@@ -285,7 +285,7 @@ export const Translator: React.FC<TranslatorProps> = ({ onShowToast }) => {
                     <button
                       type="button"
                       onClick={() => setSourceText('')}
-                      className="text-[10px] text-[#EF4444] hover:text-[#DC2626] font-medium transition-colors"
+                      className="text-xs text-[#EF4444] hover:text-[#DC2626] font-medium transition-colors"
                       aria-label="Clear source text"
                     >
                       ✕ Clear
@@ -299,12 +299,12 @@ export const Translator: React.FC<TranslatorProps> = ({ onShowToast }) => {
                   value={sourceText}
                   onChange={(e) => setSourceText(e.target.value)}
                   placeholder="Masukkan text yang ingin ditranslate..."
-                  className="w-full min-h-[160px] max-h-[320px] p-3 rounded-lg border border-[#E5E5E5] focus:border-[#95E1D3] focus:outline-none resize-none text-sm leading-relaxed"
+                  className="w-full min-h-[180px] max-h-[360px] p-4 rounded-xl border border-[#E5E5E5] focus:border-[#95E1D3] focus:outline-none resize-none text-base leading-relaxed"
                   style={{ lineHeight: '1.6' }}
                   aria-label="Source text input"
                 />
                 <div
-                  className="absolute bottom-2 right-2 text-[10px] font-medium px-1.5 py-0.5 rounded"
+                  className="absolute bottom-3 right-3 text-xs font-medium px-2 py-1 rounded"
                   style={{
                     color: charInfo.color,
                     backgroundColor: charInfo.isOverLimit ? '#FEE2E2' : 'transparent',
@@ -317,18 +317,18 @@ export const Translator: React.FC<TranslatorProps> = ({ onShowToast }) => {
 
             {/* Target Textarea */}
             <div className="relative">
-              <div className="flex items-center justify-between mb-1.5">
-                <label className="text-xs font-medium text-[#666666]">
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-sm font-medium text-[#666666]">
                   Translated Text
                 </label>
                 {targetText && (
                   <button
                     type="button"
                     onClick={handleCopyToClipboard}
-                    className="text-[10px] text-[#95E1D3] hover:text-[#81CABB] font-medium transition-colors flex items-center gap-1"
+                    className="text-xs text-[#95E1D3] hover:text-[#81CABB] font-medium transition-colors flex items-center gap-1.5"
                     aria-label="Copy translated text"
                   >
-                    <Copy className="w-2.5 h-2.5" />
+                    <Copy className="w-3 h-3" />
                     Copy
                   </button>
                 )}
@@ -338,7 +338,7 @@ export const Translator: React.FC<TranslatorProps> = ({ onShowToast }) => {
                 value={targetText}
                 readOnly
                 placeholder="Hasil translate akan muncul di sini..."
-                className="w-full min-h-[160px] max-h-[320px] p-3 rounded-lg border border-[#E5E5E5] bg-[#FAFAFA] resize-none text-sm leading-relaxed cursor-default"
+                className="w-full min-h-[180px] max-h-[360px] p-4 rounded-xl border border-[#E5E5E5] bg-[#FAFAFA] resize-none text-base leading-relaxed cursor-default"
                 style={{ lineHeight: '1.6' }}
                 aria-label="Translated text output"
               />
@@ -346,13 +346,13 @@ export const Translator: React.FC<TranslatorProps> = ({ onShowToast }) => {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-2">
+          <div className="flex flex-col sm:flex-row gap-3">
             <button
               type="button"
               onClick={handleTranslate}
               disabled={!canTranslate}
               className={`
-                flex-1 h-10 rounded-lg font-medium text-sm flex items-center justify-center gap-1.5 transition-all
+                flex-1 h-11 rounded-xl font-medium text-base flex items-center justify-center gap-2 transition-all
                 ${canTranslate
                   ? 'bg-[#95E1D3] text-black hover:bg-[#81CABB] active:scale-[0.98]'
                   : 'bg-[#CCCCCC] text-white cursor-not-allowed'
@@ -362,12 +362,12 @@ export const Translator: React.FC<TranslatorProps> = ({ onShowToast }) => {
             >
               {isTranslating ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <Loader2 className="w-5 h-5 animate-spin" />
                   <span>Translating...</span>
                 </>
               ) : (
                 <>
-                  <Languages className="w-4 h-4" />
+                  <Languages className="w-5 h-5" />
                   <span>Translate</span>
                 </>
               )}
@@ -378,7 +378,7 @@ export const Translator: React.FC<TranslatorProps> = ({ onShowToast }) => {
               onClick={handleClearAll}
               disabled={!sourceText && !targetText}
               className={`
-                sm:w-[120px] h-10 rounded-lg font-medium text-sm flex items-center justify-center gap-1.5 transition-all
+                sm:w-[140px] h-11 rounded-xl font-medium text-base flex items-center justify-center gap-2 transition-all
                 ${sourceText || targetText
                   ? 'bg-white text-[#666666] border border-[#E5E5E5] hover:bg-[#F5F5F5] active:scale-[0.98]'
                   : 'bg-white text-[#CCCCCC] border border-[#E5E5E5] cursor-not-allowed'
@@ -386,14 +386,14 @@ export const Translator: React.FC<TranslatorProps> = ({ onShowToast }) => {
               `}
               aria-label="Clear all text"
             >
-              <X className="w-4 h-4" />
+              <X className="w-5 h-5" />
               <span>Clear All</span>
             </button>
           </div>
 
           {/* Keyboard Shortcuts Info */}
-          <div className="mt-4 pt-4 border-t border-[#E5E5E5]">
-            <p className="text-[10px] text-[#999999] text-center">
+          <div className="mt-5 pt-5 border-t border-[#E5E5E5]">
+            <p className="text-xs text-[#999999] text-center">
               Shortcuts: <span className="font-medium">Ctrl/⌘ + Enter</span> to translate • 
               <span className="font-medium"> Ctrl/⌘ + K</span> to clear • 
               <span className="font-medium"> Ctrl/⌘ + S</span> to swap
@@ -401,26 +401,26 @@ export const Translator: React.FC<TranslatorProps> = ({ onShowToast }) => {
           </div>
 
           {/* Quick Tips */}
-          <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-3">
-            <div className="flex items-start gap-2 p-3 bg-[#F5F5F5] rounded-lg">
-              <span className="text-xl">💡</span>
+          <div className="mt-5 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="flex items-start gap-3 p-4 bg-[#F5F5F5] rounded-xl">
+              <span className="text-2xl">💡</span>
               <div>
-                <p className="text-[10px] font-semibold mb-0.5">Free Quota</p>
-                <p className="text-[10px] text-[#666666]">API key gratis bisa translate 500,000 char/bulan</p>
+                <p className="text-xs font-semibold mb-1">Free Quota</p>
+                <p className="text-xs text-[#666666]">API key gratis bisa translate 500,000 char/bulan</p>
               </div>
             </div>
-            <div className="flex items-start gap-2 p-3 bg-[#F5F5F5] rounded-lg">
-              <span className="text-xl">🌐</span>
+            <div className="flex items-start gap-3 p-4 bg-[#F5F5F5] rounded-xl">
+              <span className="text-2xl">🌐</span>
               <div>
-                <p className="text-[10px] font-semibold mb-0.5">Auto-Detect</p>
-                <p className="text-[10px] text-[#666666]">Gunakan auto-detect untuk deteksi bahasa otomatis</p>
+                <p className="text-xs font-semibold mb-1">Auto-Detect</p>
+                <p className="text-xs text-[#666666]">Gunakan auto-detect untuk deteksi bahasa otomatis</p>
               </div>
             </div>
-            <div className="flex items-start gap-2 p-3 bg-[#F5F5F5] rounded-lg">
-              <span className="text-xl">⇄</span>
+            <div className="flex items-start gap-3 p-4 bg-[#F5F5F5] rounded-xl">
+              <span className="text-2xl">⇄</span>
               <div>
-                <p className="text-[10px] font-semibold mb-0.5">Swap Languages</p>
-                <p className="text-[10px] text-[#666666]">Klik tombol swap untuk tukar bahasa cepat</p>
+                <p className="text-xs font-semibold mb-1">Swap Languages</p>
+                <p className="text-xs text-[#666666]">Klik tombol swap untuk tukar bahasa cepat</p>
               </div>
             </div>
           </div>
