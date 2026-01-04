@@ -1,5 +1,5 @@
 import React, { useState, DragEvent } from 'react';
-import { Download, Trash2, Plus, Folder, Loader2, Check } from 'lucide-react';
+import { Download, Trash2, Plus, Folder, Loader2, Check, Pencil, X } from 'lucide-react';
 import { FileGroup, FileItem } from '../fileTypes';
 import { FileIcon } from './FileIcon';
 
@@ -9,6 +9,7 @@ interface FileGroupCardProps {
   onDownloadAll: (group: FileGroup) => void;
   onDelete: (groupId: string) => void;
   onAddFiles: (groupId: string, files: File[]) => void;
+  onRenameFile: (groupId: string, fileId: string, newName: string) => Promise<void>;
   loading?: boolean;
   selectionMode?: boolean;
   isSelected?: boolean;
@@ -21,6 +22,7 @@ export function FileGroupCard({
   onDownloadAll,
   onDelete,
   onAddFiles,
+  onRenameFile,
   loading = false,
   selectionMode = false,
   isSelected = false,
@@ -28,6 +30,37 @@ export function FileGroupCard({
 }: FileGroupCardProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [downloadingAll, setDownloadingAll] = useState(false);
+  const [editingFileId, setEditingFileId] = useState<string | null>(null);
+  const [tempFileName, setTempFileName] = useState('');
+  const [isRenaming, setIsRenaming] = useState(false);
+
+  const startEditing = (file: FileItem) => {
+    setEditingFileId(file.id);
+    setTempFileName(file.name);
+  };
+
+  const cancelEditing = () => {
+    setEditingFileId(null);
+    setTempFileName('');
+  };
+
+  const saveFileName = async (fileId: string) => {
+    if (!tempFileName.trim()) {
+      cancelEditing();
+      return;
+    }
+
+    setIsRenaming(true);
+    try {
+      await onRenameFile(group.id, fileId, tempFileName.trim());
+      cancelEditing();
+    } catch (error) {
+      console.error('Rename error:', error);
+    } finally {
+      setIsRenaming(false);
+    }
+  };
+
 
   const handleDragEnter = (e: DragEvent) => {
     e.preventDefault();
@@ -194,18 +227,64 @@ export function FileGroupCard({
             className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors group"
           >
             <FileIcon extension={file.extension} className="w-5 h-5 flex-shrink-0" />
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate">{file.name}</p>
-              <p className="text-xs text-gray-500">{file.size}</p>
-            </div>
-            <button
-              onClick={() => onDownloadFile(file)}
-              disabled={loading}
-              className="w-7 h-7 flex items-center justify-center bg-primary rounded-full hover:bg-primary/80 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
-              aria-label={`Download ${file.name}`}
-            >
-              <Download className="w-4 h-4 text-black" />
-            </button>
+            
+            {editingFileId === file.id ? (
+              <div className="flex-1 min-w-0 flex items-center gap-2">
+                <input
+                  type="text"
+                  value={tempFileName}
+                  onChange={(e) => setTempFileName(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') saveFileName(file.id);
+                    if (e.key === 'Escape') cancelEditing();
+                  }}
+                  autoFocus
+                  className="flex-1 min-w-0 px-2 py-1 text-sm border-2 border-primary rounded-lg outline-none"
+                  disabled={isRenaming}
+                />
+                <button
+                  onClick={() => saveFileName(file.id)}
+                  disabled={isRenaming}
+                  className="p-1 hover:bg-green-100 rounded-lg text-green-600 transition-colors"
+                >
+                  <Check className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={cancelEditing}
+                  disabled={isRenaming}
+                  className="p-1 hover:bg-red-100 rounded-lg text-red-600 transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            ) : (
+              <div className="flex-1 min-w-0 flex items-center gap-2 group/item">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate">{file.name}</p>
+                  <p className="text-xs text-gray-500">{file.size}</p>
+                </div>
+                {!selectionMode && !loading && (
+                  <button
+                    onClick={() => startEditing(file)}
+                    className="p-1.5 opacity-0 group-hover/item:opacity-100 hover:bg-gray-200 rounded-lg text-gray-500 transition-all"
+                    aria-label="Edit name"
+                  >
+                    <Pencil className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+            )}
+
+            {editingFileId !== file.id && (
+              <button
+                onClick={() => onDownloadFile(file)}
+                disabled={loading}
+                className="w-7 h-7 flex items-center justify-center bg-primary rounded-full hover:bg-primary/80 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm flex-shrink-0"
+                aria-label={`Download ${file.name}`}
+              >
+                <Download className="w-4 h-4 text-black" />
+              </button>
+            )}
           </div>
         ))}
       </div>

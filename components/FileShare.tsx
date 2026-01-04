@@ -10,6 +10,7 @@ import {
   createFileGroup,
   deleteFileGroup,
   addFilesToGroup,
+  renameFileInGroup,
   subscribeToFileChanges 
 } from '../services/supabaseFileGroups';
 import { 
@@ -207,6 +208,18 @@ export function FileShare({ searchQuery, externalFiles, onExternalFilesProcessed
     }
   };
 
+  const handleRenameFile = async (groupId: string, fileId: string, newName: string) => {
+    try {
+      await renameFileInGroup(groupId, fileId, newName);
+      await loadFileGroups();
+      showToast('Nama file berhasil diubah', 'success');
+    } catch (error) {
+      console.error('Rename error:', error);
+      showToast('Gagal mengubah nama file', 'error');
+      throw error;
+    }
+  };
+
   const handleDeleteClick = (groupId: string) => {
     setDeleteConfirm({ isOpen: true, groupId });
   };
@@ -364,6 +377,7 @@ export function FileShare({ searchQuery, externalFiles, onExternalFilesProcessed
                   onDownloadAll={handleDownloadAll}
                   onDelete={handleDeleteClick}
                   onAddFiles={handleAddFiles}
+                  onRenameFile={handleRenameFile}
                   loading={loading}
                   selectionMode={selectionMode}
                   isSelected={selectedGroups.has(group.id)}

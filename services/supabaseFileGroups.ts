@@ -349,3 +349,52 @@ export async function addFilesToGroup(
     throw new Error('Gagal menambahkan file: ' + (error instanceof Error ? error.message : 'Unknown error'));
   }
 }
+
+// Rename file in group
+export async function renameFileInGroup(
+  groupId: string,
+  fileId: string,
+  newName: string
+): Promise<void> {
+  try {
+    // 1. Get current group data
+    const { data: dbGroup, error } = await supabase
+      .from('file_groups')
+      .select(`
+        *,
+        files (*)
+      `)
+      .eq('id', groupId)
+      .single();
+
+    if (error || !dbGroup) {
+      throw new Error('File group tidak ditemukan');
+    }
+
+    const group = dbToApp(dbGroup);
+    
+    // 2. Update file in files table
+    const { error: updateError } = await supabase
+      .from('files')
+      .update({ name: newName })
+      .eq('id', fileId);
+
+    if (updateError) {
+      throw updateError;
+    }
+
+    // 3. Update files array in file_groups (for redundancy/cache if used)
+    const updatedFiles = group.files.map(f => 
+      f.id === fileId ? { ...f, name: newName } : f
+    );
+
+    await updateFileGroup(groupId, {
+      files: updatedFiles
+    });
+
+    console.log('✅ File renamed:', fileId, 'to', newName);
+  } catch (error) {
+    console.error('❌ Rename file error:', error);
+    throw new Error('Gagal mengubah nama file: ' + (error instanceof Error ? error.message : 'Unknown error'));
+  }
+}
