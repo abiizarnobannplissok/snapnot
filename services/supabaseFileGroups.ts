@@ -225,7 +225,7 @@ export async function createFileGroup(
     
     onProgress?.(0);
     
-    const groupId = Date.now().toString();
+    const groupId = crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(); 
     let totalBytes = 0;
     let uploadedCount = 0;
 
@@ -240,7 +240,7 @@ export async function createFileGroup(
         const publicUrl = await uploadFileToStorage(file, groupId);
         
         const fileItem = {
-          id: `${Date.now()}-${Math.random().toString(36).substring(7)}`,
+          id: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).substring(7)}`,
           name: file.name,
           size: formatFileSize(file.size),
           sizeBytes: file.size,
@@ -356,9 +356,23 @@ export async function renameFileInGroup(
   fileId: string,
   newName: string
 ): Promise<void> {
+  console.log(`📝 Rename request - Group: ${groupId}, File: ${fileId}, NewName: ${newName}`);
   try {
-    // 1. Get current group data
-    const { data: dbGroup, error } = await supabase
+    if (!groupId || !fileId || !newName.trim()) {
+      throw new Error('Invalid arguments: groupId, fileId, and newName are required.');
+    }
+
+    const { error: updateError } = await supabase
+      .from('files')
+      .update({ name: newName.trim() })
+      .eq('id', fileId);
+
+    if (updateError) {
+      console.error('❌ Failed to update file record:', updateError);
+      throw updateError;
+    }
+
+    const { data: dbGroup, error: groupError } = await supabase
       .from('file_groups')
       .select(`
         *,
@@ -367,32 +381,31 @@ export async function renameFileInGroup(
       .eq('id', groupId)
       .single();
 
-    if (error || !dbGroup) {
-      throw new Error('File group tidak ditemukan');
+    if (groupError) {
+      console.error('❌ Error fetching group for JSON update:', groupError);
+      return; 
+    }
+
+    if (!dbGroup) {
+       console.warn(`⚠️ Group ${groupId} not found for JSON sync, but file ${fileId} was renamed.`);
+       return;
     }
 
     const group = dbToApp(dbGroup);
     
-    // 2. Update file in files table
-    const { error: updateError } = await supabase
-      .from('files')
-      .update({ name: newName })
-      .eq('id', fileId);
-
-    if (updateError) {
-      throw updateError;
-    }
-
-    // 3. Update files array in file_groups (for redundancy/cache if used)
     const updatedFiles = group.files.map(f => 
-      f.id === fileId ? { ...f, name: newName } : f
+      f.id === fileId ? { ...f, name: newName.trim() } : f
     );
 
-    await updateFileGroup(groupId, {
-      files: updatedFiles
-    });
+    try {
+      await updateFileGroup(groupId, {
+        files: updatedFiles
+      });
+    } catch (jsonUpdateError) {
+        console.warn('⚠️ Failed to update file_groups JSON cache:', jsonUpdateError);
+    }
 
-    console.log('✅ File renamed:', fileId, 'to', newName);
+    console.log('✅ File renamed successfully:', fileId, 'to', newName);
   } catch (error) {
     console.error('❌ Rename file error:', error);
     throw new Error('Gagal mengubah nama file: ' + (error instanceof Error ? error.message : 'Unknown error'));
