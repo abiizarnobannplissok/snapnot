@@ -362,50 +362,42 @@ export async function renameFileInGroup(
       throw new Error('Invalid arguments: groupId, fileId, and newName are required.');
     }
 
-    const { error: updateError } = await supabase
-      .from('files')
-      .update({ name: newName.trim() })
-      .eq('id', fileId);
-
-    if (updateError) {
-      console.error('❌ Failed to update file record:', updateError);
-      throw updateError;
-    }
-
     const { data: dbGroup, error: groupError } = await supabase
       .from('file_groups')
-      .select(`
-        *,
-        files (*)
-      `)
+      .select('*')
       .eq('id', groupId)
       .single();
 
-    if (groupError) {
-      console.error('❌ Error fetching group for JSON update:', groupError);
-      return; 
-    }
-
-    if (!dbGroup) {
-       console.warn(`⚠️ Group ${groupId} not found for JSON sync, but file ${fileId} was renamed.`);
-       return;
+    if (groupError || !dbGroup) {
+      console.error('❌ Error fetching group:', groupError);
+      throw new Error('File group tidak ditemukan');
     }
 
     const group = dbToApp(dbGroup);
     
+    const fileExists = group.files.some(f => f.id === fileId);
+    if (!fileExists) {
+       console.warn(`⚠️ File ${fileId} not found in group ${groupId}`);
+       throw new Error('File tidak ditemukan dalam grup ini');
+    }
+
     const updatedFiles = group.files.map(f => 
       f.id === fileId ? { ...f, name: newName.trim() } : f
     );
 
-    try {
-      await updateFileGroup(groupId, {
+    const { error: updateError } = await supabase
+      .from('file_groups')
+      .update({ 
         files: updatedFiles
-      });
-    } catch (jsonUpdateError) {
-        console.warn('⚠️ Failed to update file_groups JSON cache:', jsonUpdateError);
+      })
+      .eq('id', groupId);
+
+    if (updateError) {
+        console.error('❌ Failed to update file_groups JSON:', updateError);
+        throw updateError;
     }
 
-    console.log('✅ File renamed successfully:', fileId, 'to', newName);
+    console.log('✅ File renamed successfully in JSONB:', fileId, 'to', newName);
   } catch (error) {
     console.error('❌ Rename file error:', error);
     throw new Error('Gagal mengubah nama file: ' + (error instanceof Error ? error.message : 'Unknown error'));
