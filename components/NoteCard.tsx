@@ -1,5 +1,5 @@
 import React, { useState, useCallback, memo } from 'react';
-import { Edit2, Copy, Trash2, Clock, User, Check } from 'lucide-react';
+import { Edit2, Copy, Trash2, Clock, User, Check, Pin } from 'lucide-react';
 import { Note } from '../types';
 import { COLORS } from '../constants';
 import TiltedCard from './TiltedCard';
@@ -12,6 +12,8 @@ interface NoteCardProps {
   selectionMode?: boolean;
   isSelected?: boolean;
   onToggleSelect?: () => void;
+  onPin: (note: Note) => void;
+  pinnedCount: number;
 }
 
 const NoteCardComponent: React.FC<NoteCardProps> = ({ 
@@ -21,11 +23,19 @@ const NoteCardComponent: React.FC<NoteCardProps> = ({
   onCopy,
   selectionMode = false,
   isSelected = false,
-  onToggleSelect
+  onToggleSelect,
+  onPin,
+  pinnedCount
 }) => {
   const [isDeleting, setIsDeleting] = useState(false);
   const colorStyle = COLORS[note.color] || COLORS.yellow;
   const isNew = Date.now() - note.createdAt < 5 * 60 * 1000;
+  
+  // Show pin if:
+  // 1. Note is already pinned (always show or show on hover? usually always to indicate status)
+  // 2. Note is NOT pinned AND we haven't reached the limit (show on hover)
+  const canPin = pinnedCount < 3;
+  const showPinButton = note.isPinned || canPin;
 
   const formatDate = useCallback((timestamp: number) => {
     return new Intl.DateTimeFormat('id-ID', {
@@ -64,6 +74,11 @@ const NoteCardComponent: React.FC<NoteCardProps> = ({
     onToggleSelect?.();
   }, [onToggleSelect]);
 
+  const handlePinClick = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    onPin(note);
+  }, [onPin, note]);
+
   const cardContent = (
     <div 
       onClick={handleCardClick}
@@ -94,14 +109,33 @@ const NoteCardComponent: React.FC<NoteCardProps> = ({
       </button>
     )}
 
-    {isNew && !selectionMode && (
+    {!selectionMode && showPinButton && (
+      <button
+        onClick={handlePinClick}
+        className={`
+          absolute top-3 right-3 w-8 h-8 rounded-full 
+          flex items-center justify-center z-10 transition-all duration-200
+          ${note.isPinned 
+            ? 'bg-white/80 opacity-100 shadow-sm' 
+            : 'bg-white/50 opacity-0 group-hover:opacity-100 hover:bg-white shadow-sm'
+          }
+        `}
+        title={note.isPinned ? "Lepas sematan" : "Sematkan catatan"}
+      >
+        <Pin 
+          className={`w-4 h-4 ${note.isPinned ? 'fill-red-500 text-red-500' : 'text-red-500'}`} 
+        />
+      </button>
+    )}
+
+    {isNew && !selectionMode && !note.isPinned && (
       <span className="absolute -top-2 -right-2 bg-black text-white text-[9px] font-bold px-2.5 py-1 rounded-full shadow-md animate-bounce">
         BARU!
       </span>
     )}
 
     <div className="flex justify-between items-start mb-4">
-      <h3 className="text-lg font-bold text-black leading-tight line-clamp-2 w-full pr-2">
+      <h3 className={`text-lg font-bold text-black leading-tight line-clamp-2 w-full pr-8 ${note.isPinned ? 'mt-1' : ''}`}>
         {note.title}
       </h3>
     </div>

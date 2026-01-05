@@ -1,0 +1,3 @@
+ALTER TABLE notes ADD COLUMN IF NOT EXISTS is_pinned BOOLEAN DEFAULT FALSE;
+
+UPDATE notes SET is_pinned = FALSE WHERE is_pinned IS NULL;

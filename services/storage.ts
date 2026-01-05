@@ -8,6 +8,7 @@ interface DbNote {
   content: string;
   author: string;
   color: string;
+  is_pinned?: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -19,6 +20,7 @@ const dbToNote = (dbNote: DbNote): Note => ({
   content: dbNote.content,
   author: dbNote.author,
   color: dbNote.color as any,
+  isPinned: dbNote.is_pinned,
   createdAt: new Date(dbNote.created_at).getTime(),
   updatedAt: new Date(dbNote.updated_at).getTime(),
 });
@@ -30,6 +32,7 @@ const noteToDb = (note: Note) => ({
   content: note.content,
   author: note.author,
   color: note.color,
+  is_pinned: note.isPinned,
   created_at: new Date(note.createdAt).toISOString(),
   updated_at: new Date(note.updatedAt).toISOString(),
 });
@@ -39,6 +42,7 @@ export const getNotes = async (): Promise<Note[]> => {
     const { data, error } = await supabase
       .from('notes')
       .select('*')
+      .order('is_pinned', { ascending: false })
       .order('created_at', { ascending: false });
 
     if (error) throw error;

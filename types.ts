@@ -6,6 +6,7 @@ export interface Note {
   content: string;
   author: string;
   color: NoteColor;
+  isPinned?: boolean;
   createdAt: number;
   updatedAt: number;
 }

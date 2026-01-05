@@ -106,6 +106,9 @@ export default function App() {
     });
 
     return result.sort((a, b) => {
+      if (a.isPinned && !b.isPinned) return -1;
+      if (!a.isPinned && b.isPinned) return 1;
+
       switch (sortBy) {
         case 'newest':
           return b.createdAt - a.createdAt;
@@ -125,6 +128,27 @@ export default function App() {
   }, []);
 
   // Handlers
+  const handleTogglePin = async (note: Note) => {
+    try {
+      const pinnedCount = notes.filter(n => n.isPinned).length;
+      
+      if (!note.isPinned && pinnedCount >= 3) {
+        showToast('Maksimal 3 catatan yang dapat disematkan', 'error');
+        return;
+      }
+
+      const updatedNote = { ...note, isPinned: !note.isPinned };
+      await saveNote(updatedNote);
+      
+      const updatedNotes = notes.map(n => n.id === note.id ? updatedNote : n);
+      setNotes(updatedNotes);
+      
+      showToast(updatedNote.isPinned ? 'Catatan disematkan' : 'Sematkan dilepas', 'success');
+    } catch (error) {
+      showToast('Gagal mengubah status sematan', 'error');
+    }
+  };
+
   const handleSaveNote = async (data: NoteFormData) => {
     try {
       const now = Date.now();
@@ -567,6 +591,8 @@ export default function App() {
                 selectionMode={noteSelectionMode}
                 isSelected={selectedNotes.has(note.id)}
                 onToggleSelect={() => toggleNoteSelection(note.id)}
+                onPin={handleTogglePin}
+                pinnedCount={notes.filter(n => n.isPinned).length}
               />
             ))}
           </div>
