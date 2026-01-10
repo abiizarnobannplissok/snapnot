@@ -154,3 +154,95 @@ export const translateText = async ({
     throw new Error('Connection failed. Please check your internet.');
   }
 };
+
+// Document Translation API (via Cloudflare Worker)
+const DOC_WORKER_PROXY_URL = 'https://translate-dokumen-proxy.yumtive.workers.dev';
+
+export interface DocumentUploadResponse {
+  document_id: string;
+  document_key: string;
+}
+
+export interface DocumentStatusResponse {
+  status: 'queued' | 'translating' | 'done' | 'error';
+  seconds_remaining?: number;
+  error?: string;
+}
+
+export async function uploadDocument(
+  file: File,
+  sourceLang: string,
+  targetLang: string,
+  apiKey: string
+): Promise<DocumentUploadResponse> {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('target_lang', targetLang.toUpperCase());
+  if (sourceLang !== 'auto') {
+    formData.append('source_lang', sourceLang.toUpperCase());
+  }
+  formData.append('auth_key', apiKey);
+
+  const response = await fetch(DOC_WORKER_PROXY_URL, {
+    method: 'POST',
+    body: formData,
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    if (response.status === 403 || response.status === 401) {
+      throw new Error('Invalid API key');
+    } else if (response.status === 456) {
+      throw new Error('Quota exceeded');
+    } else if (response.status === 413) {
+      throw new Error('File is too large (max 2GB)');
+    }
+    throw new Error(errorData.message || 'Upload failed');
+  }
+
+  return response.json();
+}
+
+export async function checkDocumentStatus(
+  documentId: string,
+  documentKey: string,
+  apiKey: string
+): Promise<DocumentStatusResponse> {
+  const response = await fetch(`${DOC_WORKER_PROXY_URL}/status`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      document_id: documentId,
+      document_key: documentKey,
+      auth_key: apiKey,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error('Status check failed');
+  }
+
+  return response.json();
+}
+
+export async function downloadDocument(
+  documentId: string,
+  documentKey: string,
+  apiKey: string
+): Promise<Blob> {
+  const response = await fetch(`${DOC_WORKER_PROXY_URL}/result`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      document_id: documentId,
+      document_key: documentKey,
+      auth_key: apiKey,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error('Download failed');
+  }
+
+  return response.blob();
+}
