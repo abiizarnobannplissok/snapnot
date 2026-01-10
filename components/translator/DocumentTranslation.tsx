@@ -31,7 +31,7 @@ export default function DocumentTranslation({
 }: DocumentTranslationProps) {
   const [stage, setStage] = useState<Stage>('upload');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [sourceLang, setSourceLang] = useState('auto');
+  const [sourceLang, setSourceLang] = useState('EN');
   const [targetLang, setTargetLang] = useState('ID');
   const [uploadProgress, setUploadProgress] = useState(0);
   const [statusMessage, setStatusMessage] = useState('');

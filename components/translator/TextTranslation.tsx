@@ -13,7 +13,7 @@ interface TextTranslationProps {
 export default function TextTranslation({ apiKey, onError, className = '' }: TextTranslationProps) {
   const [sourceText, setSourceText] = useState('');
   const [translatedText, setTranslatedText] = useState('');
-  const [sourceLang, setSourceLang] = useState('EN-US');
+  const [sourceLang, setSourceLang] = useState('EN');
   const [targetLang, setTargetLang] = useState('ID');
   const [isLoading, setIsLoading] = useState(false);
 
