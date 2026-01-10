@@ -150,50 +150,56 @@ export const ApiKeyManager: React.FC<ApiKeyManagerProps> = ({
         }
 
         .custom-key-section {
-          margin-bottom: 20px;
+          margin-bottom: 16px;
         }
 
         .custom-key-label {
-          font-size: 14px;
-          font-weight: 500;
-          color: ${translatorColors.text.dark};
-          margin-bottom: 8px;
+          font-size: 13px;
+          font-weight: 600;
+          color: ${translatorColors.text.gray};
+          margin-bottom: 6px;
           display: block;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
         }
 
         .custom-key-input-wrapper {
           display: flex;
-          gap: 8px;
-          margin-bottom: 8px;
+          background: ${translatorColors.neutral.white};
+          border: 1px solid ${translatorColors.neutral.border};
+          border-radius: 10px;
+          padding: 4px;
+          gap: 4px;
+          transition: all 0.2s ease;
+          box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        .custom-key-input-wrapper:focus-within {
+          border-color: ${translatorColors.primary.brightRed};
+          box-shadow: 0 0 0 3px ${translatorColors.primary.brightRed}20;
         }
 
         .custom-key-input {
           flex: 1;
           height: 44px;
-          padding: 0 16px;
-          border-radius: 8px;
-          border: 1px solid ${translatorColors.neutral.border};
-          font-size: 14px;
+          padding: 0 12px;
+          border: none;
+          border-radius: 6px;
+          font-size: 15px;
           font-family: 'SF Mono', 'Monaco', 'Menlo', monospace;
           color: ${translatorColors.text.dark};
-          background: ${translatorColors.neutral.white};
-          transition: all 0.2s ease;
+          background: transparent;
+          min-width: 0;
         }
 
         .custom-key-input:focus {
           outline: none;
-          border-color: ${translatorColors.primary.brightRed};
-          box-shadow: ${translatorColors.shadow.focusRed};
-        }
-
-        .custom-key-input::placeholder {
-          color: ${translatorColors.text.gray};
         }
 
         .test-key-button {
           height: 44px;
-          padding: 0 20px;
-          border-radius: 8px;
+          padding: 0 16px;
+          border-radius: 6px;
           border: none;
           background: ${translatorColors.primary.brightRed};
           color: white;
@@ -202,6 +208,9 @@ export const ApiKeyManager: React.FC<ApiKeyManagerProps> = ({
           cursor: pointer;
           transition: all 0.2s ease;
           white-space: nowrap;
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
 
         .test-key-button:hover {
@@ -367,19 +376,21 @@ export const ApiKeyManager: React.FC<ApiKeyManagerProps> = ({
           }
 
           .custom-key-input-wrapper {
-            flex-direction: column;
+            flex-direction: row;
+            padding: 4px;
           }
 
           .custom-key-input {
-            height: 48px;
-            font-size: 16px;
-            padding: 0 16px;
+            height: 44px;
+            font-size: 15px;
+            padding: 0 10px;
           }
 
           .test-key-button {
-            width: 100%;
-            height: 48px;
-            font-size: 16px;
+            width: auto;
+            height: 44px;
+            font-size: 14px;
+            padding: 0 12px;
           }
 
           .copy-button span {

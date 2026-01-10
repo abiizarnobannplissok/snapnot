@@ -15,13 +15,13 @@ interface TextTranslationProps {
 export default function TextTranslation({ apiKey, onError, className = '' }: TextTranslationProps) {
   const [sourceText, setSourceText] = useState('');
   const [translatedText, setTranslatedText] = useState('');
-  const [sourceLang, setSourceLang] = useState('auto');
+  const [sourceLang, setSourceLang] = useState('EN');
   const [targetLang, setTargetLang] = useState('ID');
   const [isLoading, setIsLoading] = useState(false);
 
   const charCount = sourceText.length;
   const maxChars = 5000;
-  const isSwapDisabled = sourceLang === 'auto' || !sourceText || !translatedText;
+  const isSwapDisabled = sourceLang === 'auto';
 
   const handleTranslate = async () => {
     if (!sourceText.trim()) {
@@ -55,9 +55,23 @@ export default function TextTranslation({ apiKey, onError, className = '' }: Tex
   const handleSwap = () => {
     if (isSwapDisabled) return;
 
-    const tempLang = sourceLang;
-    setSourceLang(targetLang);
-    setTargetLang(tempLang);
+    let newSourceLang = targetLang;
+    let newTargetLang = sourceLang;
+
+    if (newSourceLang === 'EN-US' || newSourceLang === 'EN-GB') {
+      newSourceLang = 'EN';
+    } else if (newSourceLang === 'PT-BR' || newSourceLang === 'PT-PT') {
+      newSourceLang = 'PT';
+    }
+
+    if (newTargetLang === 'EN') {
+      newTargetLang = 'EN-US';
+    } else if (newTargetLang === 'PT') {
+      newTargetLang = 'PT-BR';
+    }
+
+    setSourceLang(newSourceLang);
+    setTargetLang(newTargetLang);
 
     const tempText = sourceText;
     setSourceText(translatedText);
