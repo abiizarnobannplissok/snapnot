@@ -156,8 +156,6 @@ export const translateText = async ({
 };
 
 // Document Translation API (via Cloudflare Worker)
-const DOC_WORKER_PROXY_URL = 'https://translate-dokumen-proxy.yumtive.workers.dev';
-
 export interface DocumentUploadResponse {
   document_id: string;
   document_key: string;
@@ -181,10 +179,12 @@ export async function uploadDocument(
   if (sourceLang !== 'auto') {
     formData.append('source_lang', sourceLang.toUpperCase());
   }
-  formData.append('auth_key', apiKey);
 
-  const response = await fetch(DOC_WORKER_PROXY_URL, {
+  const response = await fetch(`${WORKER_PROXY_URL}/document/upload`, {
     method: 'POST',
+    headers: {
+      'X-DeepL-API-Key': apiKey,
+    },
     body: formData,
   });
 
@@ -208,14 +208,13 @@ export async function checkDocumentStatus(
   documentKey: string,
   apiKey: string
 ): Promise<DocumentStatusResponse> {
-  const response = await fetch(`${DOC_WORKER_PROXY_URL}/status`, {
+  const response = await fetch(`${WORKER_PROXY_URL}/document/${documentId}/status`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      document_id: documentId,
-      document_key: documentKey,
-      auth_key: apiKey,
-    }),
+    headers: { 
+      'X-DeepL-API-Key': apiKey,
+      'Content-Type': 'application/x-www-form-urlencoded' 
+    },
+    body: new URLSearchParams({ document_key: documentKey }).toString(),
   });
 
   if (!response.ok) {
@@ -230,14 +229,13 @@ export async function downloadDocument(
   documentKey: string,
   apiKey: string
 ): Promise<Blob> {
-  const response = await fetch(`${DOC_WORKER_PROXY_URL}/result`, {
+  const response = await fetch(`${WORKER_PROXY_URL}/document/${documentId}/download`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      document_id: documentId,
-      document_key: documentKey,
-      auth_key: apiKey,
-    }),
+    headers: { 
+      'X-DeepL-API-Key': apiKey,
+      'Content-Type': 'application/x-www-form-urlencoded' 
+    },
+    body: new URLSearchParams({ document_key: documentKey }).toString(),
   });
 
   if (!response.ok) {
