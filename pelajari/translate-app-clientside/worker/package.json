@@ -1,0 +1,21 @@
+{
+  "name": "translate-dokumen-worker",
+  "version": "1.0.0",
+  "description": "Cloudflare Worker proxy for DeepL API",
+  "main": "index.js",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy"
+  },
+  "keywords": [
+    "cloudflare",
+    "worker",
+    "deepl",
+    "proxy"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "wrangler": "^3.0.0"
+  }
+}

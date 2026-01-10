@@ -1,0 +1,11 @@
+name = "translate-proxy"
+main = "index.js"
+compatibility_date = "2024-01-01"
+
+# Workers configuration
+workers_dev = true
+
+# Optional: Add custom domain
+# routes = [
+#   { pattern = "api.yourdomain.com/*", zone_name = "yourdomain.com" }
+# ]
