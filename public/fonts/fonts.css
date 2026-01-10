@@ -1,0 +1,17 @@
+/**
+ * GC EPICPRO Font - Custom Typography for SnapNot
+ */
+
+@font-face {
+  font-family: 'GC EPICPRO';
+  src: url('/fonts/GC-EPICPRO.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Font Variables */
+:root {
+  --font-primary: 'GC EPICPRO', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  --font-fallback: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
