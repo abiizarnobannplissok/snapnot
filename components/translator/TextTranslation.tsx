@@ -1,7 +1,5 @@
-'use client';
-
 import React, { useState } from 'react';
-import { ArrowLeftRight } from 'lucide-react';
+import { ArrowLeftRight, ChevronDown, Languages } from 'lucide-react';
 import { SOURCE_LANGUAGES, TARGET_LANGUAGES, type Language } from '@/constants/languages';
 import { translateText as apiTranslateText } from '@/services/deepLService';
 import { translatorColors } from '@/constants/translatorColors';
@@ -15,7 +13,7 @@ interface TextTranslationProps {
 export default function TextTranslation({ apiKey, onError, className = '' }: TextTranslationProps) {
   const [sourceText, setSourceText] = useState('');
   const [translatedText, setTranslatedText] = useState('');
-  const [sourceLang, setSourceLang] = useState('EN');
+  const [sourceLang, setSourceLang] = useState('EN-US');
   const [targetLang, setTargetLang] = useState('ID');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -90,10 +88,10 @@ export default function TextTranslation({ apiKey, onError, className = '' }: Tex
         style={{
           backgroundColor: translatorColors.neutral.warmGray,
           borderRadius: '12px',
-          padding: '16px',
+          padding: '20px',
           display: 'flex',
           flexDirection: 'column',
-          gap: '16px',
+          gap: '20px',
         }}
       >
         <div
@@ -183,13 +181,85 @@ export default function TextTranslation({ apiKey, onError, className = '' }: Tex
           </select>
         </div>
 
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-            gap: '16px',
-          }}
-        >
+        <div className="translation-content-grid">
+          <style>{`
+            .translation-content-grid {
+              display: grid;
+              grid-template-columns: 1fr;
+              gap: 16px;
+            }
+
+            @media (min-width: 992px) {
+              .translation-content-grid {
+                grid-template-columns: 1fr auto 1fr;
+                align-items: stretch;
+              }
+            }
+
+            .middle-action-separator {
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              justify-content: center;
+              gap: 12px;
+              padding: 8px 0;
+            }
+
+            .main-translate-btn {
+              width: 100%;
+              min-height: 56px;
+              padding: 0 24px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              gap: 12px;
+              background: ${translatorColors.primary.brightRed};
+              color: white;
+              border: none;
+              border-radius: 12px;
+              font-size: 18px;
+              font-weight: 700;
+              cursor: pointer;
+              transition: all 0.2s ease;
+              box-shadow: ${translatorColors.shadow.medium};
+              text-transform: uppercase;
+              letter-spacing: 0.5px;
+            }
+
+            @media (min-width: 992px) {
+              .main-translate-btn {
+                width: 64px;
+                height: 100%;
+                flex-direction: column;
+                padding: 24px 0;
+                border-radius: 32px;
+              }
+              
+              .main-translate-btn span {
+                writing-mode: vertical-lr;
+                transform: rotate(180deg);
+                margin: 12px 0;
+              }
+            }
+
+            .main-translate-btn:hover:not(:disabled) {
+              background: ${translatorColors.primary.deepRed};
+              transform: scale(1.02);
+              box-shadow: ${translatorColors.shadow.heavy};
+            }
+
+            .main-translate-btn:active:not(:disabled) {
+              transform: scale(0.98);
+            }
+
+            .main-translate-btn:disabled {
+              background: ${translatorColors.neutral.border};
+              opacity: 0.6;
+              cursor: not-allowed;
+              box-shadow: none;
+            }
+          `}</style>
+
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <textarea
               value={sourceText}
@@ -199,18 +269,42 @@ export default function TextTranslation({ apiKey, onError, className = '' }: Tex
               aria-label="Source text"
               style={{
                 height: '300px',
-                padding: '16px',
-                fontSize: '16px',
-                lineHeight: '1.5',
+                padding: '20px',
+                fontSize: '17px',
+                lineHeight: '1.6',
                 color: translatorColors.text.dark,
                 backgroundColor: translatorColors.neutral.white,
                 border: `1px solid ${translatorColors.neutral.borderLight}`,
-                borderRadius: '8px',
-                resize: 'vertical',
+                borderRadius: '12px',
+                resize: 'none',
                 outline: 'none',
+                boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.02)',
                 fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
               }}
             />
+            <div
+              style={{
+                fontSize: '13px',
+                color: charCount > maxChars ? translatorColors.accent.errorRed : translatorColors.text.gray,
+                fontWeight: '600',
+                marginTop: '8px',
+                textAlign: 'right'
+              }}
+            >
+              {charCount.toLocaleString()} / {maxChars.toLocaleString()}
+            </div>
+          </div>
+
+          <div className="middle-action-separator">
+            <button
+              className="main-translate-btn"
+              onClick={handleTranslate}
+              disabled={isLoading || !sourceText.trim() || charCount > maxChars}
+            >
+              <Languages size={24} />
+              <span>{isLoading ? '...' : 'Translate'}</span>
+              <ChevronDown size={24} />
+            </button>
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -221,84 +315,31 @@ export default function TextTranslation({ apiKey, onError, className = '' }: Tex
               aria-label="Translated text"
               style={{
                 height: '300px',
-                padding: '16px',
-                fontSize: '16px',
-                lineHeight: '1.5',
+                padding: '20px',
+                fontSize: '17px',
+                lineHeight: '1.6',
                 color: translatorColors.text.dark,
                 backgroundColor: translatorColors.neutral.white,
                 border: `1px solid ${translatorColors.neutral.borderLight}`,
-                borderRadius: '8px',
-                resize: 'vertical',
+                borderRadius: '12px',
+                resize: 'none',
                 outline: 'none',
                 cursor: 'default',
+                boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.02)',
                 fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
               }}
             />
+            <div
+              style={{
+                fontSize: '12px',
+                color: translatorColors.text.light,
+                marginTop: '8px',
+                textAlign: 'center',
+              }}
+            >
+              Press Ctrl+Enter to translate
+            </div>
           </div>
-        </div>
-
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            flexWrap: 'wrap',
-            gap: '12px',
-          }}
-        >
-          <div
-            style={{
-              fontSize: '14px',
-              color: charCount > maxChars ? translatorColors.accent.errorRed : translatorColors.text.gray,
-              fontWeight: '500',
-            }}
-          >
-            {charCount} / {maxChars}
-          </div>
-
-          <button
-            onClick={handleTranslate}
-            disabled={isLoading || !sourceText.trim() || charCount > maxChars}
-            aria-label="Translate text"
-            style={{
-              padding: '0 32px',
-              height: '44px',
-              fontSize: '16px',
-              fontWeight: '600',
-              color: translatorColors.neutral.white,
-              backgroundColor: translatorColors.primary.brightRed,
-              border: 'none',
-              borderRadius: '8px',
-              cursor: isLoading || !sourceText.trim() || charCount > maxChars ? 'not-allowed' : 'pointer',
-              opacity: isLoading || !sourceText.trim() || charCount > maxChars ? 0.6 : 1,
-              transition: 'all 0.2s',
-              boxShadow: translatorColors.shadow.light,
-            }}
-            onMouseEnter={(e) => {
-              if (!isLoading && sourceText.trim() && charCount <= maxChars) {
-                e.currentTarget.style.backgroundColor = translatorColors.primary.deepRed;
-                e.currentTarget.style.transform = 'translateY(-1px)';
-                e.currentTarget.style.boxShadow = translatorColors.shadow.medium;
-              }
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = translatorColors.primary.brightRed;
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = translatorColors.shadow.light;
-            }}
-          >
-            {isLoading ? 'Translating...' : 'Translate'}
-          </button>
-        </div>
-
-        <div
-          style={{
-            fontSize: '12px',
-            color: translatorColors.text.light,
-            textAlign: 'center',
-          }}
-        >
-          Press Ctrl+Enter to translate
         </div>
       </div>
     </div>
