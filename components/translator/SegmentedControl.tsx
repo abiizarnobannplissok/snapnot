@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { translatorColors } from '../../constants/translatorColors';
 
 export interface SegmentedControlProps {
@@ -14,6 +14,7 @@ export interface SegmentedControlProps {
   onChange: (value: string) => void;
   /** Optional additional CSS classes */
   className?: string;
+  ariaLabel?: string;
 }
 
 export const SegmentedControl: React.FC<SegmentedControlProps> = ({
@@ -21,14 +22,21 @@ export const SegmentedControl: React.FC<SegmentedControlProps> = ({
   value,
   onChange,
   className = '',
+  ariaLabel = 'Mode selection',
 }) => {
+  if (options.length === 0) {
+    console.warn('SegmentedControl: options array is empty');
+    return null;
+  }
+
   const [indicatorStyle, setIndicatorStyle] = useState<React.CSSProperties>({});
   const containerRef = useRef<HTMLDivElement>(null);
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   useEffect(() => {
     const activeIndex = options.findIndex(opt => opt.value === value);
-    const activeButton = buttonRefs.current[activeIndex];
+    const validIndex = activeIndex >= 0 ? activeIndex : 0;
+    const activeButton = buttonRefs.current[validIndex];
     
     if (activeButton && containerRef.current) {
       const containerRect = containerRef.current.getBoundingClientRect();
@@ -41,7 +49,7 @@ export const SegmentedControl: React.FC<SegmentedControlProps> = ({
     }
   }, [value, options]);
 
-  const handleKeyDown = (e: React.KeyboardEvent, currentIndex: number) => {
+  const handleKeyDown = useCallback((e: React.KeyboardEvent, currentIndex: number) => {
     let nextIndex = currentIndex;
 
     switch (e.key) {
@@ -72,7 +80,7 @@ export const SegmentedControl: React.FC<SegmentedControlProps> = ({
 
     buttonRefs.current[nextIndex]?.focus();
     onChange(options[nextIndex].value);
-  };
+  }, [options, onChange]);
 
   return (
     <div
@@ -83,7 +91,7 @@ export const SegmentedControl: React.FC<SegmentedControlProps> = ({
         height: '44px',
       }}
       role="tablist"
-      aria-label="Mode selection"
+      aria-label={ariaLabel}
     >
       <div
         className="absolute top-[2px] bottom-[2px] rounded-[10px] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]"
@@ -109,15 +117,15 @@ export const SegmentedControl: React.FC<SegmentedControlProps> = ({
             className={`
               relative z-10 flex-1 flex items-center justify-center gap-2 
               rounded-[10px] font-medium text-sm transition-all
-              focus:outline-none focus:ring-2 focus:ring-offset-2
+              focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500
               active:scale-[0.97]
               ${isActive 
-                ? 'text-white' 
+                ? '' 
                 : 'text-[#86868B] hover:text-[#6B6B70]'
               }
             `}
             style={{
-              color: isActive ? '#FFFFFF' : translatorColors.text.gray,
+              color: isActive ? translatorColors.neutral.white : translatorColors.text.gray,
               transitionProperty: 'color, transform',
               transitionDuration: '0.2s',
               transitionTimingFunction: 'ease',
