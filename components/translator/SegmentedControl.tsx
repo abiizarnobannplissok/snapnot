@@ -85,10 +85,14 @@ export const SegmentedControl: React.FC<SegmentedControlProps> = ({
   return (
     <div
       ref={containerRef}
-      className={`relative inline-flex p-[2px] rounded-xl w-full md:w-auto ${className}`}
+      className={`relative inline-flex p-[2px] rounded-xl ${className}`}
       style={{ 
         backgroundColor: translatorColors.neutral.warmGray,
         height: '44px',
+        width: '100%',
+        maxWidth: '400px',
+        margin: '0 auto',
+        display: 'flex',
       }}
       role="tablist"
       aria-label={ariaLabel}

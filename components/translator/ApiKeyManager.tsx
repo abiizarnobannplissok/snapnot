@@ -46,6 +46,7 @@ export const ApiKeyManager: React.FC<ApiKeyManagerProps> = ({
     try {
       await navigator.clipboard.writeText(key);
       setCopiedId(id);
+      setCustomKey(key);
       
       setTimeout(() => {
         setCopiedId(null);
@@ -369,8 +370,16 @@ export const ApiKeyManager: React.FC<ApiKeyManagerProps> = ({
             flex-direction: column;
           }
 
+          .custom-key-input {
+            height: 48px;
+            font-size: 16px;
+            padding: 0 16px;
+          }
+
           .test-key-button {
             width: 100%;
+            height: 48px;
+            font-size: 16px;
           }
 
           .copy-button span {
