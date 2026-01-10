@@ -38,15 +38,15 @@ export const clearApiKey = (): void => {
 export const validateApiKey = async (key: string): Promise<ApiKeyValidationResult> => {
   try {
     // Try worker proxy first, fallback to direct
-    const response = await fetch(`${WORKER_PROXY_URL}/translate`, {
+    const response = await fetch(`${WORKER_PROXY_URL}/translate/text`, {
       method: 'POST',
       headers: {
+        'X-DeepL-API-Key': key,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        text: ['test'],
+        text: 'test',
         target_lang: 'DE',
-        auth_key: key,
       }),
     });
 
@@ -96,9 +96,8 @@ export const translateText = async ({
 
   try {
     const body: any = {
-      text: [text],
+      text: text,
       target_lang: targetLang.toUpperCase(),
-      auth_key: apiKey,
     };
     
     // Add source_lang only if not auto-detect
@@ -106,9 +105,10 @@ export const translateText = async ({
       body.source_lang = sourceLang.toUpperCase();
     }
     
-    const response = await fetch(`${WORKER_PROXY_URL}/translate`, {
+    const response = await fetch(`${WORKER_PROXY_URL}/translate/text`, {
       method: 'POST',
       headers: {
+        'X-DeepL-API-Key': apiKey,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(body),
