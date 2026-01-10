@@ -108,15 +108,15 @@ export default function DocumentTranslation({
         const status: DocumentStatusResponse = await checkDocumentStatus(docId, docKey, apiKey);
 
         if (status.status === 'queued') {
-          setStatusMessage('Queued for translation...');
+          setStatusMessage('Bentar ya, lagi ngantre nih...');
           setUploadProgress(10);
         } else if (status.status === 'translating') {
           const remaining = status.seconds_remaining || 0;
-          setStatusMessage(`Translating... (${remaining}s remaining)`);
+          setStatusMessage(`Lagi diproses ya... (tinggal ${remaining} detikan lagi)`);
           setUploadProgress(50);
         } else if (status.status === 'done') {
           stopPolling();
-          setStatusMessage('Translation complete!');
+          setStatusMessage('Mantap! Berhasil diterjemahin!');
           setUploadProgress(100);
 
           const blob = await downloadDocument(docId, docKey, apiKey);

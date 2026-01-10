@@ -213,39 +213,40 @@ export default function TextTranslation({ apiKey, onError, className = '' }: Tex
               align-items: center;
               justify-content: center;
               gap: 12px;
-              background: ${translatorColors.primary.brightRed};
+              background: linear-gradient(135deg, ${translatorColors.primary.brightRed}, ${translatorColors.primary.deepRed});
               color: white;
               border: none;
               border-radius: 12px;
               font-size: 18px;
               font-weight: 700;
               cursor: pointer;
-              transition: all 0.2s ease;
-              box-shadow: ${translatorColors.shadow.medium};
+              transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+              box-shadow: 0 4px 14px 0 rgba(255, 59, 48, 0.39);
               text-transform: uppercase;
               letter-spacing: 0.5px;
             }
 
             @media (min-width: 992px) {
               .main-translate-btn {
-                width: 64px;
+                width: 72px;
                 height: 100%;
                 flex-direction: column;
-                padding: 24px 0;
-                border-radius: 32px;
+                padding: 32px 0;
+                border-radius: 36px;
               }
               
               .main-translate-btn span {
                 writing-mode: vertical-lr;
                 transform: rotate(180deg);
-                margin: 12px 0;
+                margin: 16px 0;
+                letter-spacing: 2px;
               }
             }
 
             .main-translate-btn:hover:not(:disabled) {
-              background: ${translatorColors.primary.deepRed};
               transform: scale(1.02);
-              box-shadow: ${translatorColors.shadow.heavy};
+              box-shadow: 0 6px 20px rgba(255, 59, 48, 0.5);
+              filter: brightness(1.1);
             }
 
             .main-translate-btn:active:not(:disabled) {
@@ -301,9 +302,9 @@ export default function TextTranslation({ apiKey, onError, className = '' }: Tex
               onClick={handleTranslate}
               disabled={isLoading || !sourceText.trim() || charCount > maxChars}
             >
-              <Languages size={24} />
-              <span>{isLoading ? '...' : 'Translate'}</span>
-              <ChevronDown size={24} />
+              <Languages size={26} strokeWidth={2.5} />
+              <span>{isLoading ? '...' : 'AI Translate'}</span>
+              <ChevronDown size={26} strokeWidth={2.5} />
             </button>
           </div>
 
