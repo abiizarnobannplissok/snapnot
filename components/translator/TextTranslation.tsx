@@ -213,15 +213,15 @@ export default function TextTranslation({ apiKey, onError, className = '' }: Tex
               align-items: center;
               justify-content: center;
               gap: 12px;
-              background: linear-gradient(135deg, ${translatorColors.primary.brightRed}, ${translatorColors.primary.deepRed});
-              color: white;
+              background: #D4FF00;
+              color: black;
               border: none;
               border-radius: 12px;
               font-size: 18px;
               font-weight: 700;
               cursor: pointer;
               transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-              box-shadow: 0 4px 14px 0 rgba(255, 59, 48, 0.39);
+              box-shadow: 0 4px 14px 0 rgba(212, 255, 0, 0.4);
               text-transform: uppercase;
               letter-spacing: 0.5px;
             }
@@ -245,8 +245,8 @@ export default function TextTranslation({ apiKey, onError, className = '' }: Tex
 
             .main-translate-btn:hover:not(:disabled) {
               transform: scale(1.02);
-              box-shadow: 0 6px 20px rgba(255, 59, 48, 0.5);
-              filter: brightness(1.1);
+              box-shadow: 0 6px 20px rgba(212, 255, 0, 0.6);
+              filter: brightness(1.05);
             }
 
             .main-translate-btn:active:not(:disabled) {
@@ -258,6 +258,7 @@ export default function TextTranslation({ apiKey, onError, className = '' }: Tex
               opacity: 0.6;
               cursor: not-allowed;
               box-shadow: none;
+              color: ${translatorColors.text.gray};
             }
           `}</style>
 

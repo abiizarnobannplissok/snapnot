@@ -411,29 +411,31 @@ export default function DocumentTranslation({
               disabled={!selectedFile}
               style={{
                 padding: '0 32px',
-                height: '44px',
+                height: '48px',
                 fontSize: '16px',
-                fontWeight: '600',
-                color: translatorColors.neutral.white,
-                backgroundColor: translatorColors.primary.brightRed,
+                fontWeight: '700',
+                color: 'black',
+                backgroundColor: '#D4FF00',
                 border: 'none',
-                borderRadius: '8px',
+                borderRadius: '12px',
                 cursor: selectedFile ? 'pointer' : 'not-allowed',
                 opacity: selectedFile ? 1 : 0.6,
                 transition: 'all 0.2s',
-                boxShadow: translatorColors.shadow.light,
+                boxShadow: '0 4px 12px rgba(212, 255, 0, 0.4)',
+                textTransform: 'uppercase',
+                letterSpacing: '0.5px',
               }}
               onMouseEnter={(e) => {
                 if (selectedFile) {
-                  e.currentTarget.style.backgroundColor = translatorColors.primary.deepRed;
                   e.currentTarget.style.transform = 'translateY(-1px)';
-                  e.currentTarget.style.boxShadow = translatorColors.shadow.medium;
+                  e.currentTarget.style.boxShadow = '0 6px 16px rgba(212, 255, 0, 0.5)';
+                  e.currentTarget.style.filter = 'brightness(1.05)';
                 }
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = translatorColors.primary.brightRed;
                 e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = translatorColors.shadow.light;
+                e.currentTarget.style.boxShadow = '0 4px 12px rgba(212, 255, 0, 0.4)';
+                e.currentTarget.style.filter = 'none';
               }}
             >
               Translate Document
