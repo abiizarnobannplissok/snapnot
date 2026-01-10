@@ -15,6 +15,7 @@ interface TranslatorProps {
 export const Translator: React.FC<TranslatorProps> = ({ onShowToast }) => {
   const [mode, setMode] = useState<TranslationMode>('text');
   const [selectedApiKey, setSelectedApiKey] = useState<string>('');
+  const [showApiKeyManager, setShowApiKeyManager] = useState<boolean>(true);
   
   const handleError = (error: string) => {
     if (onShowToast) {
@@ -26,6 +27,7 @@ export const Translator: React.FC<TranslatorProps> = ({ onShowToast }) => {
 
   const handleApiKeySelect = (apiKey: string) => {
     setSelectedApiKey(apiKey);
+    setShowApiKeyManager(false);
     if (onShowToast) {
       onShowToast('API key selected successfully!', 'success');
     }
@@ -64,28 +66,80 @@ export const Translator: React.FC<TranslatorProps> = ({ onShowToast }) => {
         maxWidth: '1200px',
         margin: '0 auto',
       }}>
-        <div style={{ marginBottom: '24px' }}>
-          <ApiKeyManager onKeySelect={handleApiKeySelect} />
-        </div>
+        {/* API Key Section - Collapsed when key selected */}
+        {selectedApiKey && !showApiKeyManager ? (
+          <div style={{ marginBottom: '16px' }}>
+            <button
+              onClick={() => setShowApiKeyManager(true)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '12px 16px',
+                backgroundColor: translatorColors.neutral.white,
+                border: `1px solid ${translatorColors.neutral.borderLight}`,
+                borderRadius: '8px',
+                fontSize: '14px',
+                color: translatorColors.text.gray,
+                cursor: 'pointer',
+                width: '100%',
+                transition: 'all 0.2s',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = translatorColors.primary.brightRed;
+                e.currentTarget.style.color = translatorColors.text.dark;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = translatorColors.neutral.borderLight;
+                e.currentTarget.style.color = translatorColors.text.gray;
+              }}
+            >
+              <span>🔑</span>
+              <span>API Key: {selectedApiKey.slice(0, 8)}...{selectedApiKey.slice(-3)}</span>
+              <span style={{ marginLeft: 'auto', fontSize: '12px' }}>Click to change</span>
+            </button>
+          </div>
+        ) : (
+          <div style={{ marginBottom: '24px' }}>
+            <ApiKeyManager onKeySelect={handleApiKeySelect} />
+          </div>
+        )}
 
-        <div style={{ marginBottom: '24px' }}>
-          <SegmentedControl
-            options={[
-              { value: 'text', label: 'Teks', icon: <FileText size={16} /> },
-              { value: 'document', label: 'Dokumen', icon: <FileUp size={16} /> },
-            ]}
-            value={mode}
-            onChange={(value) => setMode(value as TranslationMode)}
-          />
-        </div>
+        {selectedApiKey && (
+          <>
+            <div style={{ marginBottom: '24px' }}>
+              <SegmentedControl
+                options={[
+                  { value: 'text', label: 'Teks', icon: <FileText size={16} /> },
+                  { value: 'document', label: 'Dokumen', icon: <FileUp size={16} /> },
+                ]}
+                value={mode}
+                onChange={(value) => setMode(value as TranslationMode)}
+              />
+            </div>
 
-        {!selectedApiKey ? (
+            {mode === 'text' ? (
+              <TextTranslation
+                apiKey={selectedApiKey}
+                onError={handleError}
+              />
+            ) : (
+              <DocumentTranslation
+                apiKey={selectedApiKey}
+                onError={handleError}
+              />
+            )}
+          </>
+        )}
+
+        {!selectedApiKey && (
           <div style={{
             backgroundColor: translatorColors.neutral.white,
             borderRadius: '12px',
             padding: '48px 24px',
             textAlign: 'center',
             boxShadow: translatorColors.shadow.light,
+            marginTop: '24px',
           }}>
             <div style={{ 
               fontSize: '64px', 
@@ -142,20 +196,6 @@ export const Translator: React.FC<TranslatorProps> = ({ onShowToast }) => {
               Get Free API Key
             </a>
           </div>
-        ) : (
-          <>
-            {mode === 'text' ? (
-              <TextTranslation
-                apiKey={selectedApiKey}
-                onError={handleError}
-              />
-            ) : (
-              <DocumentTranslation
-                apiKey={selectedApiKey}
-                onError={handleError}
-              />
-            )}
-          </>
         )}
       </div>
 

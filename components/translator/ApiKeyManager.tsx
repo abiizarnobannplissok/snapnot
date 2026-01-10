@@ -72,12 +72,14 @@ export const ApiKeyManager: React.FC<ApiKeyManagerProps> = ({
     setTestStatus({ type: null, message: '' });
 
     try {
-      const response = await fetch('https://api-free.deepl.com/v2/usage', {
+      const response = await fetch('https://translate-proxy.yumtive.workers.dev/usage', {
         method: 'POST',
         headers: {
-          'Authorization': `DeepL-Auth-Key ${customKey.trim()}`,
-          'Content-Type': 'application/x-www-form-urlencoded',
+          'Content-Type': 'application/json',
         },
+        body: JSON.stringify({
+          auth_key: customKey.trim(),
+        }),
       });
 
       if (response.ok) {
@@ -90,7 +92,7 @@ export const ApiKeyManager: React.FC<ApiKeyManagerProps> = ({
         if (onKeySelect) {
           onKeySelect(customKey.trim());
         }
-      } else if (response.status === 403) {
+      } else if (response.status === 403 || response.status === 401) {
         setTestStatus({
           type: 'error',
           message: '✗ Invalid API key',
@@ -101,9 +103,10 @@ export const ApiKeyManager: React.FC<ApiKeyManagerProps> = ({
           message: '✗ Quota exceeded (500k chars/month)',
         });
       } else {
+        const errorData = await response.json().catch(() => ({}));
         setTestStatus({
           type: 'error',
-          message: `✗ Error: ${response.statusText}`,
+          message: `✗ Error: ${errorData.message || response.statusText}`,
         });
       }
     } catch (error) {
