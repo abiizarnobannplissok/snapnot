@@ -21,8 +21,8 @@ type Stage = 'upload' | 'progress' | 'complete';
 
 const ACCEPTED_FILE_TYPES = '.pdf,.docx,.doc';
 const MAX_FILE_SIZE_2GB = 2 * 1024 * 1024 * 1024;
-const POLL_INTERVAL_MS = 2500;
-const MAX_POLL_ATTEMPTS = 720;
+const POLL_INTERVAL_MS = 2000; // Match reference: 2 seconds
+const MAX_POLL_ATTEMPTS = 120; // 120 attempts * 2s = 4 minutes max
 
 export default function DocumentTranslation({ 
   apiKey, 
@@ -106,16 +106,21 @@ export default function DocumentTranslation({
         }
 
         const status: DocumentStatusResponse = await checkDocumentStatus(docId, docKey, apiKey);
+        console.log('[DocTranslate] Status:', status.status, 'Remaining:', status.seconds_remaining, 'Attempt:', pollAttemptsRef.current);
 
         if (status.status === 'queued') {
           setStatusMessage('Bentar ya bos, lagi antre nih...');
           setUploadProgress(15);
         } else if (status.status === 'translating') {
           const remaining = status.seconds_remaining || 0;
-          setStatusMessage(`Sabar ya, lagi dimasak nih... (sekitar ${remaining} detik lagi)`);
+          const progressPct = Math.min(25 + (pollAttemptsRef.current * 2), 70);
+          setUploadProgress(Math.floor(progressPct));
           
-          const calculatedProgress = Math.min(20 + (pollAttemptsRef.current * 0.4), 90);
-          setUploadProgress(Math.floor(calculatedProgress));
+          if (remaining > 0) {
+            setStatusMessage(`Sabar ya, lagi dimasak nih... (sekitar ${remaining} detik lagi)`);
+          } else {
+            setStatusMessage(`Sabar ya, lagi dimasak nih... (${progressPct}%)`);
+          }
         } else if (status.status === 'done') {
           stopPolling();
           setStatusMessage('Mantap! Berhasil diterjemahin!');
