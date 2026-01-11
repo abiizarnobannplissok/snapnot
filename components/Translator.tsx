@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { SegmentedControl } from './translator/SegmentedControl';
 import { ApiKeyManager } from './translator/ApiKeyManager';
 import TextTranslation from './translator/TextTranslation';
@@ -12,10 +12,28 @@ interface TranslatorProps {
   onShowToast?: (message: string, type: 'success' | 'error') => void;
 }
 
+const API_KEY_STORAGE_KEY = 'snapnot_deepl_api_key';
+
 export const Translator: React.FC<TranslatorProps> = ({ onShowToast }) => {
   const [mode, setMode] = useState<TranslationMode>('text');
   const [selectedApiKey, setSelectedApiKey] = useState<string>('');
   const [showApiKeyManager, setShowApiKeyManager] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  
+  useEffect(() => {
+    try {
+      const savedApiKey = localStorage.getItem(API_KEY_STORAGE_KEY);
+      if (savedApiKey) {
+        console.log('[Translator] Restored API key from localStorage');
+        setSelectedApiKey(savedApiKey);
+        setShowApiKeyManager(false);
+      }
+    } catch (error) {
+      console.error('[Translator] Failed to restore API key:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
   
   const handleError = (error: string) => {
     if (onShowToast) {
@@ -26,12 +44,38 @@ export const Translator: React.FC<TranslatorProps> = ({ onShowToast }) => {
   };
 
   const handleApiKeySelect = (apiKey: string) => {
+    try {
+      localStorage.setItem(API_KEY_STORAGE_KEY, apiKey);
+      console.log('[Translator] API key saved to localStorage');
+    } catch (error) {
+      console.error('[Translator] Failed to save API key:', error);
+    }
+    
     setSelectedApiKey(apiKey);
     setShowApiKeyManager(false);
     if (onShowToast) {
       onShowToast('API key selected successfully!', 'success');
     }
   };
+
+  if (isLoading) {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        backgroundColor: translatorColors.neutral.warmGray,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}>
+        <div style={{
+          fontSize: '18px',
+          color: translatorColors.text.gray,
+        }}>
+          Loading...
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{
