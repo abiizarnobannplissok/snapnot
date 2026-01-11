@@ -322,9 +322,18 @@ export default function DocumentTranslation({
           setStatusMessage('Mantap! Berhasil diterjemahin!');
           setUploadProgress(100);
 
-          const blob = await downloadDocument(docId, docKey, apiKey);
-          setTranslatedBlob(blob);
-          setStage('complete');
+          try {
+            const blob = await downloadDocument(docId, docKey, apiKey);
+            setTranslatedBlob(blob);
+            setStage('complete');
+          } catch (downloadError) {
+            const errorMessage = downloadError instanceof Error 
+              ? downloadError.message 
+              : 'Gagal download hasil terjemahan';
+            console.error('[DocTranslate] Download error:', downloadError);
+            onError?.(errorMessage);
+            setStage('upload');
+          }
           return;
         } else if (status.status === 'error') {
           stopPolling();

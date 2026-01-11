@@ -239,7 +239,15 @@ export async function downloadDocument(
   });
 
   if (!response.ok) {
-    throw new Error('Download failed');
+    const errorData = await response.json().catch(() => ({}));
+    if (response.status === 404) {
+      throw new Error('Dokumen ga ketemu. Mungkin udah kadaluarsa, coba translate ulang ya!');
+    } else if (response.status === 403 || response.status === 401) {
+      throw new Error('API key invalid atau kadaluarsa');
+    } else if (response.status === 503) {
+      throw new Error('Server DeepL lagi sibuk. Tunggu sebentar terus coba download lagi ya!');
+    }
+    throw new Error(errorData.message || `Download gagal (${response.status}). Coba lagi ya!`);
   }
 
   return response.blob();
