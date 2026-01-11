@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useCallback } from 'react';
-import { Upload, CheckCircle2, Download, Loader2, X } from 'lucide-react';
+import { Upload, CheckCircle2, Download, Loader2, X, Languages } from 'lucide-react';
 import { SOURCE_LANGUAGES, TARGET_LANGUAGES } from '@/constants/languages';
 import { 
   uploadDocument, 
@@ -20,9 +20,9 @@ interface DocumentTranslationProps {
 type Stage = 'upload' | 'progress' | 'complete';
 
 const ACCEPTED_FILE_TYPES = '.pdf,.docx,.doc';
-const MAX_FILE_SIZE = 2 * 1024 * 1024 * 1024;
-const STATUS_POLL_INTERVAL = 2000;
-const MAX_POLL_ATTEMPTS = 60;
+const MAX_FILE_SIZE_2GB = 2 * 1024 * 1024 * 1024;
+const POLL_INTERVAL_MS = 2500;
+const MAX_POLL_ATTEMPTS = 720;
 
 export default function DocumentTranslation({ 
   apiKey, 
@@ -41,7 +41,7 @@ export default function DocumentTranslation({
   const [isDragOver, setIsDragOver] = useState(false);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const pollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const pollAttemptsRef = useRef(0);
 
   const handleFileSelect = useCallback((file: File | null) => {
@@ -49,12 +49,12 @@ export default function DocumentTranslation({
 
     const validTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/msword'];
     if (!validTypes.includes(file.type)) {
-      onError?.('Please select a PDF, DOCX, or DOC file');
+      onError?.('Pilih file PDF, DOCX, atau DOC aja ya!');
       return;
     }
 
-    if (file.size > MAX_FILE_SIZE) {
-      onError?.('File size exceeds 2GB limit');
+    if (file.size > MAX_FILE_SIZE_2GB) {
+      onError?.('Waduh, filenya kegedean! Maksimal 2GB ya.');
       return;
     }
 
@@ -85,9 +85,9 @@ export default function DocumentTranslation({
   }, [handleFileSelect]);
 
   const stopPolling = useCallback(() => {
-    if (pollIntervalRef.current) {
-      clearInterval(pollIntervalRef.current);
-      pollIntervalRef.current = null;
+    if (pollTimeoutRef.current) {
+      clearTimeout(pollTimeoutRef.current);
+      pollTimeoutRef.current = null;
     }
   }, []);
 
@@ -100,7 +100,7 @@ export default function DocumentTranslation({
 
         if (pollAttemptsRef.current > MAX_POLL_ATTEMPTS) {
           stopPolling();
-          onError?.('Translation timed out. Please try again.');
+          onError?.('Aduh, kelamaan nih. DeepL-nya lagi lemot, coba lagi ntar ya!');
           setStage('upload');
           return;
         }
@@ -108,12 +108,14 @@ export default function DocumentTranslation({
         const status: DocumentStatusResponse = await checkDocumentStatus(docId, docKey, apiKey);
 
         if (status.status === 'queued') {
-          setStatusMessage('Bentar ya, lagi ngantre nih...');
-          setUploadProgress(10);
+          setStatusMessage('Bentar ya bos, lagi antre nih...');
+          setUploadProgress(15);
         } else if (status.status === 'translating') {
           const remaining = status.seconds_remaining || 0;
-          setStatusMessage(`Lagi diproses ya... (tinggal ${remaining} detikan lagi)`);
-          setUploadProgress(50);
+          setStatusMessage(`Sabar ya, lagi dimasak nih... (sekitar ${remaining} detik lagi)`);
+          
+          const calculatedProgress = Math.min(20 + (pollAttemptsRef.current * 0.4), 90);
+          setUploadProgress(Math.floor(calculatedProgress));
         } else if (status.status === 'done') {
           stopPolling();
           setStatusMessage('Mantap! Berhasil diterjemahin!');
@@ -122,32 +124,35 @@ export default function DocumentTranslation({
           const blob = await downloadDocument(docId, docKey, apiKey);
           setTranslatedBlob(blob);
           setStage('complete');
+          return;
         } else if (status.status === 'error') {
           stopPolling();
-          onError?.(status.error || 'Translation failed');
+          onError?.(status.error || 'Waduh, terjemahannya gagal nih. Coba cek filenya.');
           setStage('upload');
+          return;
         }
+
+        pollTimeoutRef.current = setTimeout(poll, POLL_INTERVAL_MS);
       } catch (error) {
         stopPolling();
-        const errorMessage = error instanceof Error ? error.message : 'Status check failed';
+        const errorMessage = error instanceof Error ? error.message : 'Gagal ngecek status nih';
         onError?.(errorMessage);
         setStage('upload');
       }
     };
 
     await poll();
-    pollIntervalRef.current = setInterval(poll, STATUS_POLL_INTERVAL);
   }, [apiKey, onError, stopPolling]);
 
   const handleUpload = useCallback(async () => {
     if (!selectedFile) {
-      onError?.('Please select a file first');
+      onError?.('Pilih filenya dulu dong bos!');
       return;
     }
 
     setStage('progress');
     setUploadProgress(0);
-    setStatusMessage('Uploading document...');
+    setStatusMessage('Lagi ngirim dokumennya nih...');
 
     try {
       setUploadProgress(5);
@@ -155,12 +160,12 @@ export default function DocumentTranslation({
       
       setDocumentId(result.document_id);
       setDocumentKey(result.document_key);
-      setUploadProgress(15);
-      setStatusMessage('Upload complete. Starting translation...');
+      setUploadProgress(10);
+      setStatusMessage('Sip, sudah kekirim! Mulai terjemahin ya...');
 
       await pollDocumentStatus(result.document_id, result.document_key);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Upload failed';
+      const errorMessage = error instanceof Error ? error.message : 'Gagal upload nih';
       onError?.(errorMessage);
       setStage('upload');
     }
@@ -296,9 +301,9 @@ export default function DocumentTranslation({
               onClick={() => fileInputRef.current?.click()}
               style={{
                 height: '300px',
-                border: `2px dashed ${isDragOver ? translatorColors.primary.brightRed : translatorColors.neutral.border}`,
-                borderRadius: '12px',
-                backgroundColor: isDragOver ? translatorColors.primary.rosePink : translatorColors.neutral.lightGray,
+                border: `2px dashed ${isDragOver ? '#D4FF00' : '#CCCCCC'}`,
+                borderRadius: '16px',
+                backgroundColor: isDragOver ? 'rgba(212, 255, 0, 0.05)' : '#FAFAFA',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
@@ -308,40 +313,19 @@ export default function DocumentTranslation({
                 transition: 'all 0.3s',
                 transform: isDragOver ? 'scale(1.02)' : 'scale(1)',
               }}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  fileInputRef.current?.click();
-                }
-              }}
-              aria-label="Upload document area"
             >
               <Upload 
                 size={64} 
-                color={selectedFile ? translatorColors.accent.successGreen : translatorColors.text.gray} 
+                color={selectedFile ? '#34C759' : '#86868B'} 
               />
               
               {selectedFile ? (
                 <>
                   <div style={{ textAlign: 'center' }}>
-                    <div
-                      style={{
-                        fontSize: '18px',
-                        fontWeight: '600',
-                        color: translatorColors.text.dark,
-                        marginBottom: '8px',
-                      }}
-                    >
+                    <div style={{ fontSize: '18px', fontWeight: '600', color: '#1D1D1F', marginBottom: '8px' }}>
                       {selectedFile.name}
                     </div>
-                    <div
-                      style={{
-                        fontSize: '14px',
-                        color: translatorColors.text.gray,
-                      }}
-                    >
+                    <div style={{ fontSize: '14px', color: '#86868B' }}>
                       {(selectedFile.size / (1024 * 1024)).toFixed(2)} MB
                     </div>
                   </div>
@@ -349,49 +333,31 @@ export default function DocumentTranslation({
                     onClick={(e) => {
                       e.stopPropagation();
                       setSelectedFile(null);
-                      if (fileInputRef.current) {
-                        fileInputRef.current.value = '';
-                      }
+                      if (fileInputRef.current) fileInputRef.current.value = '';
                     }}
                     style={{
                       padding: '8px 16px',
                       fontSize: '14px',
-                      color: translatorColors.accent.errorRed,
+                      color: '#EF4444',
                       backgroundColor: 'transparent',
-                      border: `1px solid ${translatorColors.accent.errorRed}`,
-                      borderRadius: '6px',
+                      border: '1px solid #EF4444',
+                      borderRadius: '8px',
                       cursor: 'pointer',
                     }}
                   >
-                    Remove
+                    Hapus File
                   </button>
                 </>
               ) : (
                 <>
-                  <div
-                    style={{
-                      fontSize: '18px',
-                      fontWeight: '600',
-                      color: translatorColors.text.dark,
-                    }}
-                  >
-                    Drag & drop your document here
+                  <div style={{ fontSize: '18px', fontWeight: '600', color: '#1D1D1F' }}>
+                    Geser file ke sini bosku
                   </div>
-                  <div
-                    style={{
-                      fontSize: '14px',
-                      color: translatorColors.text.gray,
-                    }}
-                  >
-                    or click to browse
+                  <div style={{ fontSize: '14px', color: '#86868B' }}>
+                    atau klik buat cari file
                   </div>
-                  <div
-                    style={{
-                      fontSize: '12px',
-                      color: translatorColors.text.light,
-                    }}
-                  >
-                    Supported: PDF, DOCX, DOC (max 2GB)
+                  <div style={{ fontSize: '12px', color: '#999999' }}>
+                    Bisa PDF, DOCX, DOC (maks 2GB)
                   </div>
                 </>
               )}
@@ -402,7 +368,6 @@ export default function DocumentTranslation({
                 accept={ACCEPTED_FILE_TYPES}
                 onChange={handleFileInputChange}
                 style={{ display: 'none' }}
-                aria-label="File input"
               />
             </div>
 
@@ -410,35 +375,38 @@ export default function DocumentTranslation({
               onClick={handleUpload}
               disabled={!selectedFile}
               style={{
-                padding: '0 32px',
-                height: '48px',
-                fontSize: '16px',
-                fontWeight: '700',
-                color: 'black',
+                width: '100%',
+                height: '64px',
+                fontSize: '18px',
+                fontWeight: '800',
+                color: '#000000',
                 backgroundColor: '#D4FF00',
                 border: 'none',
-                borderRadius: '12px',
+                borderRadius: '20px',
                 cursor: selectedFile ? 'pointer' : 'not-allowed',
                 opacity: selectedFile ? 1 : 0.6,
-                transition: 'all 0.2s',
-                boxShadow: '0 4px 12px rgba(212, 255, 0, 0.4)',
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                boxShadow: '0 4px 15px rgba(212, 255, 0, 0.3)',
                 textTransform: 'uppercase',
-                letterSpacing: '0.5px',
+                letterSpacing: '1px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '12px'
               }}
               onMouseEnter={(e) => {
                 if (selectedFile) {
-                  e.currentTarget.style.transform = 'translateY(-1px)';
-                  e.currentTarget.style.boxShadow = '0 6px 16px rgba(212, 255, 0, 0.5)';
-                  e.currentTarget.style.filter = 'brightness(1.05)';
+                  e.currentTarget.style.transform = 'scale(1.02)';
+                  e.currentTarget.style.boxShadow = '0 8px 25px rgba(212, 255, 0, 0.5)';
                 }
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '0 4px 12px rgba(212, 255, 0, 0.4)';
-                e.currentTarget.style.filter = 'none';
+                e.currentTarget.style.transform = 'scale(1)';
+                e.currentTarget.style.boxShadow = '0 4px 15px rgba(212, 255, 0, 0.3)';
               }}
             >
-              Translate Document
+              <Languages size={26} strokeWidth={2.5} />
+              AI Translate Dokumen
             </button>
           </>
         )}
@@ -455,49 +423,19 @@ export default function DocumentTranslation({
           >
             <Loader2
               size={48}
-              color={translatorColors.primary.brightRed}
+              color="#D4FF00"
               style={{ animation: 'spin 1s linear infinite' }}
             />
             
-            <div
-              style={{
-                fontSize: '18px',
-                fontWeight: '600',
-                color: translatorColors.text.dark,
-                textAlign: 'center',
-              }}
-            >
+            <div style={{ fontSize: '18px', fontWeight: '600', color: '#1D1D1F', textAlign: 'center' }}>
               {statusMessage}
             </div>
 
             <div style={{ width: '100%', maxWidth: '400px' }}>
-              <div
-                style={{
-                  width: '100%',
-                  height: '8px',
-                  backgroundColor: translatorColors.neutral.borderLight,
-                  borderRadius: '999px',
-                  overflow: 'hidden',
-                }}
-              >
-                <div
-                  style={{
-                    width: `${uploadProgress}%`,
-                    height: '100%',
-                    backgroundColor: translatorColors.primary.brightRed,
-                    borderRadius: '999px',
-                    transition: 'width 0.3s ease',
-                  }}
-                />
+              <div style={{ width: '100%', height: '12px', backgroundColor: '#E5E5E5', borderRadius: '999px', overflow: 'hidden' }}>
+                <div style={{ width: `${uploadProgress}%`, height: '100%', backgroundColor: '#D4FF00', borderRadius: '999px', transition: 'width 0.3s ease' }} />
               </div>
-              <div
-                style={{
-                  fontSize: '14px',
-                  color: translatorColors.text.gray,
-                  textAlign: 'center',
-                  marginTop: '8px',
-                }}
-              >
+              <div style={{ fontSize: '16px', fontWeight: '700', color: '#000000', textAlign: 'center', marginTop: '12px' }}>
                 {uploadProgress}%
               </div>
             </div>
@@ -506,26 +444,17 @@ export default function DocumentTranslation({
               onClick={handleCancel}
               style={{
                 padding: '0 24px',
-                height: '36px',
+                height: '40px',
                 fontSize: '14px',
-                fontWeight: '500',
-                color: translatorColors.text.gray,
+                fontWeight: '600',
+                color: '#86868B',
                 backgroundColor: 'transparent',
-                border: `1px solid ${translatorColors.neutral.border}`,
-                borderRadius: '6px',
+                border: '1px solid #CCCCCC',
+                borderRadius: '10px',
                 cursor: 'pointer',
-                transition: 'all 0.2s',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = translatorColors.accent.errorRed;
-                e.currentTarget.style.color = translatorColors.accent.errorRed;
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = translatorColors.neutral.border;
-                e.currentTarget.style.color = translatorColors.text.gray;
               }}
             >
-              Cancel
+              Batalin Aja
             </button>
           </div>
         )}
@@ -540,94 +469,54 @@ export default function DocumentTranslation({
               padding: '32px 16px',
             }}
           >
-            <CheckCircle2 size={64} color={translatorColors.accent.successGreen} />
+            <CheckCircle2 size={64} color="#34C759" />
             
-            <div
-              style={{
-                fontSize: '20px',
-                fontWeight: '600',
-                color: translatorColors.text.dark,
-                textAlign: 'center',
-              }}
-            >
-              Translation Complete!
+            <div style={{ fontSize: '22px', fontWeight: '700', color: '#1D1D1F', textAlign: 'center' }}>
+              Mantap! Sudah Selesai!
             </div>
 
-            <div
-              style={{
-                fontSize: '14px',
-                color: translatorColors.text.gray,
-                textAlign: 'center',
-              }}
-            >
-              Your document has been translated successfully.
+            <div style={{ fontSize: '15px', color: '#86868B', textAlign: 'center' }}>
+              Dokumen kamu sudah berhasil diterjemahkan.
             </div>
 
-            <div
-              style={{
-                display: 'flex',
-                gap: '12px',
-                flexWrap: 'wrap',
-                justifyContent: 'center',
-              }}
-            >
+            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center' }}>
               <button
                 onClick={handleDownload}
                 style={{
                   padding: '0 32px',
-                  height: '44px',
+                  height: '56px',
                   fontSize: '16px',
-                  fontWeight: '600',
-                  color: translatorColors.neutral.white,
-                  backgroundColor: translatorColors.primary.brightRed,
+                  fontWeight: '700',
+                  color: '#000000',
+                  backgroundColor: '#D4FF00',
                   border: 'none',
-                  borderRadius: '8px',
+                  borderRadius: '16px',
                   cursor: 'pointer',
-                  transition: 'all 0.2s',
-                  boxShadow: translatorColors.shadow.light,
+                  boxShadow: '0 4px 12px rgba(212, 255, 0, 0.3)',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '8px',
                 }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = translatorColors.primary.deepRed;
-                  e.currentTarget.style.transform = 'translateY(-1px)';
-                  e.currentTarget.style.boxShadow = translatorColors.shadow.medium;
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = translatorColors.primary.brightRed;
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = translatorColors.shadow.light;
-                }}
               >
                 <Download size={20} />
-                Download
+                Download Hasilnya
               </button>
 
               <button
                 onClick={handleReset}
                 style={{
                   padding: '0 24px',
-                  height: '44px',
+                  height: '56px',
                   fontSize: '16px',
                   fontWeight: '600',
-                  color: translatorColors.text.dark,
+                  color: '#1D1D1F',
                   backgroundColor: 'transparent',
-                  border: `1px solid ${translatorColors.neutral.border}`,
-                  borderRadius: '8px',
+                  border: '2px solid #E5E5E5',
+                  borderRadius: '16px',
                   cursor: 'pointer',
-                  transition: 'all 0.2s',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = translatorColors.primary.brightRed;
-                  e.currentTarget.style.color = translatorColors.primary.brightRed;
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = translatorColors.neutral.border;
-                  e.currentTarget.style.color = translatorColors.text.dark;
                 }}
               >
-                Translate Another
+                Terjemahin Lagi
               </button>
             </div>
           </div>
@@ -636,12 +525,8 @@ export default function DocumentTranslation({
 
       <style jsx>{`
         @keyframes spin {
-          from {
-            transform: rotate(0deg);
-          }
-          to {
-            transform: rotate(360deg);
-          }
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
         }
       `}</style>
     </div>
