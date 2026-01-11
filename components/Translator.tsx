@@ -66,46 +66,11 @@ export const Translator: React.FC<TranslatorProps> = ({ onShowToast }) => {
         maxWidth: '1200px',
         margin: '0 auto',
       }}>
-        {/* API Key Section - Collapsed when key selected */}
-        {selectedApiKey && !showApiKeyManager ? (
-          <div style={{ marginBottom: '16px' }}>
-            <button
-              onClick={() => setShowApiKeyManager(true)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '12px 16px',
-                backgroundColor: translatorColors.neutral.white,
-                border: `1px solid ${translatorColors.neutral.borderLight}`,
-                borderRadius: '8px',
-                fontSize: '14px',
-                color: translatorColors.text.gray,
-                cursor: 'pointer',
-                width: '100%',
-                transition: 'all 0.2s',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = translatorColors.primary.brightRed;
-                e.currentTarget.style.color = translatorColors.text.dark;
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = translatorColors.neutral.borderLight;
-                e.currentTarget.style.color = translatorColors.text.gray;
-              }}
-            >
-              <span>🔑</span>
-              <span>API Key: {selectedApiKey.slice(0, 8)}...{selectedApiKey.slice(-3)}</span>
-              <span style={{ marginLeft: 'auto', fontSize: '12px' }}>Click to change</span>
-            </button>
-          </div>
-        ) : (
+        {!selectedApiKey || showApiKeyManager ? (
           <div style={{ marginBottom: '24px' }}>
             <ApiKeyManager onKeySelect={handleApiKeySelect} />
           </div>
-        )}
-
-        {selectedApiKey && (
+        ) : (
           <>
             <div style={{ marginBottom: '24px' }}>
               <SegmentedControl
@@ -129,6 +94,30 @@ export const Translator: React.FC<TranslatorProps> = ({ onShowToast }) => {
                 onError={handleError}
               />
             )}
+
+            <div style={{ marginTop: '24px' }}>
+              <button
+                onClick={() => setShowApiKeyManager(true)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '12px 16px',
+                  backgroundColor: translatorColors.neutral.white,
+                  border: `1px solid ${translatorColors.neutral.borderLight}`,
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  color: translatorColors.text.gray,
+                  cursor: 'pointer',
+                  width: '100%',
+                  transition: 'all 0.2s',
+                }}
+              >
+                <span>🔑</span>
+                <span>API Key: {selectedApiKey.slice(0, 8)}...{selectedApiKey.slice(-3)}</span>
+                <span style={{ marginLeft: 'auto', fontSize: '12px' }}>Click to change</span>
+              </button>
+            </div>
           </>
         )}
 
@@ -181,16 +170,6 @@ export const Translator: React.FC<TranslatorProps> = ({ onShowToast }) => {
                 textDecoration: 'none',
                 transition: 'all 0.2s',
                 boxShadow: translatorColors.shadow.light,
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = translatorColors.primary.deepRed;
-                e.currentTarget.style.transform = 'translateY(-1px)';
-                e.currentTarget.style.boxShadow = translatorColors.shadow.medium;
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = translatorColors.primary.brightRed;
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = translatorColors.shadow.light;
               }}
             >
               Get Free API Key

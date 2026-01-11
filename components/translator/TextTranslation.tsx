@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { ArrowLeftRight, ChevronDown, Languages } from 'lucide-react';
-import { SOURCE_LANGUAGES, TARGET_LANGUAGES, type Language } from '@/constants/languages';
+import React, { useState, useCallback } from 'react';
+import { ArrowLeftRight, ChevronDown, Languages, Copy, Check } from 'lucide-react';
+import { SOURCE_LANGUAGES, TARGET_LANGUAGES } from '@/constants/languages';
 import { translateText as apiTranslateText } from '@/services/deepLService';
 import { translatorColors } from '@/constants/translatorColors';
 
@@ -16,6 +16,7 @@ export default function TextTranslation({ apiKey, onError, className = '' }: Tex
   const [sourceLang, setSourceLang] = useState('EN');
   const [targetLang, setTargetLang] = useState('ID');
   const [isLoading, setIsLoading] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
 
   const charCount = sourceText.length;
   const maxChars = 5000;
@@ -41,6 +42,7 @@ export default function TextTranslation({ apiKey, onError, className = '' }: Tex
         apiKey: apiKey,
       });
       setTranslatedText(result.translatedText);
+      setIsCopied(false);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Translation failed';
       onError?.(errorMessage);
@@ -49,6 +51,17 @@ export default function TextTranslation({ apiKey, onError, className = '' }: Tex
       setIsLoading(false);
     }
   };
+
+  const handleCopyResult = useCallback(async () => {
+    if (!translatedText) return;
+    try {
+      await navigator.clipboard.writeText(translatedText);
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000);
+    } catch (error) {
+      console.error('Failed to copy:', error);
+    }
+  }, [translatedText]);
 
   const handleSwap = () => {
     if (isSwapDisabled) return;
@@ -142,6 +155,14 @@ export default function TextTranslation({ apiKey, onError, className = '' }: Tex
               alignItems: 'center',
               justifyContent: 'center',
               transition: 'all 0.2s',
+            }}
+            onMouseEnter={(e) => {
+              if (!isSwapDisabled) {
+                e.currentTarget.style.backgroundColor = translatorColors.interactive.hover;
+              }
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = translatorColors.neutral.white;
             }}
           >
             <ArrowLeftRight size={20} color={translatorColors.text.gray} />
@@ -250,9 +271,46 @@ export default function TextTranslation({ apiKey, onError, className = '' }: Tex
               cursor: not-allowed;
               box-shadow: none;
             }
+
+            .textarea-wrapper {
+              position: relative;
+              display: flex;
+              flex-direction: column;
+            }
+
+            .copy-result-btn {
+              position: absolute;
+              bottom: 48px;
+              right: 12px;
+              display: flex;
+              align-items: center;
+              gap: 6px;
+              padding: 8px 12px;
+              background: ${translatorColors.neutral.white};
+              border: 1px solid ${translatorColors.neutral.border};
+              border-radius: 8px;
+              font-size: 13px;
+              font-weight: 600;
+              color: ${translatorColors.text.dark};
+              cursor: pointer;
+              transition: all 0.2s;
+              box-shadow: ${translatorColors.shadow.light};
+              z-index: 5;
+            }
+
+            .copy-result-btn:hover {
+              background: ${translatorColors.neutral.warmGray};
+              border-color: ${translatorColors.primary.brightRed};
+            }
+
+            .copy-result-btn.copied {
+              background: ${translatorColors.accent.successGreen};
+              color: white;
+              border-color: ${translatorColors.accent.successGreen};
+            }
           `}</style>
 
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <div className="textarea-wrapper">
             <textarea
               value={sourceText}
               onChange={(e) => setSourceText(e.target.value)}
@@ -299,7 +357,7 @@ export default function TextTranslation({ apiKey, onError, className = '' }: Tex
             </button>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <div className="textarea-wrapper">
             <textarea
               value={translatedText}
               readOnly
@@ -321,6 +379,17 @@ export default function TextTranslation({ apiKey, onError, className = '' }: Tex
                 fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
               }}
             />
+            
+            {translatedText && !isLoading && (
+              <button 
+                className={`copy-result-btn ${isCopied ? 'copied' : ''}`}
+                onClick={handleCopyResult}
+              >
+                {isCopied ? <Check size={16} /> : <Copy size={16} />}
+                <span>{isCopied ? 'Tersalin!' : 'Salin Hasil'}</span>
+              </button>
+            )}
+
             <div
               style={{
                 fontSize: '12px',
