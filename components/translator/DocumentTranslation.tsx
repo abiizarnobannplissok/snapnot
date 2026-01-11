@@ -21,8 +21,23 @@ type Stage = 'upload' | 'progress' | 'complete';
 
 const ACCEPTED_FILE_TYPES = '.pdf,.docx,.doc';
 const MAX_FILE_SIZE_2GB = 2 * 1024 * 1024 * 1024;
-const POLL_INTERVAL_MS = 2000; // Match reference: 2 seconds
-const MAX_POLL_ATTEMPTS = 120; // 120 attempts * 2s = 4 minutes max
+const POLL_INTERVAL_MS = 2000;
+
+const calculateMaxAttempts = (fileSizeBytes: number): number => {
+  const fileSizeMB = fileSizeBytes / (1024 * 1024);
+  
+  if (fileSizeMB < 1) {
+    return 120;
+  } else if (fileSizeMB < 5) {
+    return 300;
+  } else if (fileSizeMB < 10) {
+    return 450;
+  } else if (fileSizeMB < 50) {
+    return 900;
+  } else {
+    return 1800;
+  }
+};
 
 export default function DocumentTranslation({ 
   apiKey, 
@@ -91,19 +106,16 @@ export default function DocumentTranslation({
     }
   }, []);
 
-  const pollDocumentStatus = useCallback(async (docId: string, docKey: string) => {
+  const pollDocumentStatus = useCallback(async (docId: string, docKey: string, fileSize: number) => {
     pollAttemptsRef.current = 0;
+    const maxAttempts = calculateMaxAttempts(fileSize);
+    const estimatedMinutes = Math.ceil((maxAttempts * POLL_INTERVAL_MS) / 60000);
+    
+    console.log(`[DocTranslate] File size: ${(fileSize / (1024 * 1024)).toFixed(2)} MB, Max attempts: ${maxAttempts} (${estimatedMinutes} min)`);
 
     const poll = async () => {
       try {
         pollAttemptsRef.current += 1;
-
-        if (pollAttemptsRef.current > MAX_POLL_ATTEMPTS) {
-          stopPolling();
-          onError?.('Aduh, kelamaan nih. DeepL-nya lagi lemot, coba lagi ntar ya!');
-          setStage('upload');
-          return;
-        }
 
         const status: DocumentStatusResponse = await checkDocumentStatus(docId, docKey, apiKey);
         console.log('[DocTranslate] Status:', status.status, 'Remaining:', status.seconds_remaining, 'Attempt:', pollAttemptsRef.current);
@@ -113,11 +125,31 @@ export default function DocumentTranslation({
           setUploadProgress(15);
         } else if (status.status === 'translating') {
           const remaining = status.seconds_remaining || 0;
+          
+          const estimatedAttemptsNeeded = remaining > 0 
+            ? Math.ceil(remaining / (POLL_INTERVAL_MS / 1000)) + pollAttemptsRef.current
+            : pollAttemptsRef.current;
+          
+          const dynamicMaxAttempts = Math.max(maxAttempts, estimatedAttemptsNeeded + 30);
+          
+          if (pollAttemptsRef.current > dynamicMaxAttempts) {
+            stopPolling();
+            onError?.('Aduh, kelamaan nih. DeepL-nya lagi lemot, coba lagi ntar ya!');
+            setStage('upload');
+            return;
+          }
+          
           const progressPct = Math.min(25 + (pollAttemptsRef.current * 2), 70);
           setUploadProgress(Math.floor(progressPct));
           
           if (remaining > 0) {
-            setStatusMessage(`Sabar ya, lagi dimasak nih... (sekitar ${remaining} detik lagi)`);
+            const minutes = Math.floor(remaining / 60);
+            const seconds = remaining % 60;
+            if (minutes > 0) {
+              setStatusMessage(`Sabar ya, lagi dimasak nih... (sekitar ${minutes} menit ${seconds} detik lagi)`);
+            } else {
+              setStatusMessage(`Sabar ya, lagi dimasak nih... (sekitar ${seconds} detik lagi)`);
+            }
           } else {
             setStatusMessage(`Sabar ya, lagi dimasak nih... (${progressPct}%)`);
           }
@@ -157,7 +189,13 @@ export default function DocumentTranslation({
 
     setStage('progress');
     setUploadProgress(0);
-    setStatusMessage('Lagi ngirim dokumennya nih...');
+    
+    const fileSizeMB = selectedFile.size / (1024 * 1024);
+    if (fileSizeMB > 10) {
+      setStatusMessage(`File besar nih (${fileSizeMB.toFixed(1)} MB), sabar ya...`);
+    } else {
+      setStatusMessage('Lagi ngirim dokumennya nih...');
+    }
 
     try {
       setUploadProgress(5);
@@ -168,7 +206,7 @@ export default function DocumentTranslation({
       setUploadProgress(10);
       setStatusMessage('Sip, sudah kekirim! Mulai terjemahin ya...');
 
-      await pollDocumentStatus(result.document_id, result.document_key);
+      await pollDocumentStatus(result.document_id, result.document_key, selectedFile.size);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Gagal upload nih';
       onError?.(errorMessage);
@@ -350,10 +388,22 @@ export default function DocumentTranslation({
                       style={{
                         fontSize: '14px',
                         color: translatorColors.text.gray,
+                        marginBottom: '4px',
                       }}
                     >
                       {(selectedFile.size / (1024 * 1024)).toFixed(2)} MB
                     </div>
+                    {selectedFile.size > 10 * 1024 * 1024 && (
+                      <div
+                        style={{
+                          fontSize: '12px',
+                          color: translatorColors.accent.warningOrange,
+                          fontWeight: '500',
+                        }}
+                      >
+                        ⏱️ File besar, estimasi ~{Math.ceil(calculateMaxAttempts(selectedFile.size) * 2 / 60)} menit
+                      </div>
+                    )}
                   </div>
                   <button
                     onClick={(e) => {
