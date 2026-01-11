@@ -72,7 +72,7 @@ export const Translator: React.FC<TranslatorProps> = ({ onShowToast }) => {
           </div>
         ) : (
           <>
-            <div style={{ marginBottom: '24px' }}>
+            <div style={{ marginBottom: '12px' }}>
               <SegmentedControl
                 options={[
                   { value: 'text', label: 'Teks', icon: <FileText size={16} /> },
@@ -83,19 +83,20 @@ export const Translator: React.FC<TranslatorProps> = ({ onShowToast }) => {
               />
             </div>
 
-            {mode === 'text' ? (
+            <div style={{ display: mode === 'text' ? 'block' : 'none' }}>
               <TextTranslation
                 apiKey={selectedApiKey}
                 onError={handleError}
               />
-            ) : (
+            </div>
+            <div style={{ display: mode === 'document' ? 'block' : 'none' }}>
               <DocumentTranslation
                 apiKey={selectedApiKey}
                 onError={handleError}
               />
-            )}
+            </div>
 
-            <div style={{ marginTop: '24px' }}>
+            <div style={{ marginTop: '16px' }}>
               <button
                 onClick={() => setShowApiKeyManager(true)}
                 style={{

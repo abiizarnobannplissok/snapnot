@@ -218,15 +218,15 @@ export default function DocumentTranslation({
   }, [stopPolling, onError]);
 
   return (
-    <div className={className} style={{ padding: '16px' }}>
+    <div className={className} style={{ padding: '8px' }}>
       <div
         style={{
           backgroundColor: translatorColors.neutral.warmGray,
           borderRadius: '12px',
-          padding: '24px',
+          padding: '16px',
           display: 'flex',
           flexDirection: 'column',
-          gap: '24px',
+          gap: '16px',
         }}
       >
         {stage === 'upload' && (
@@ -305,7 +305,7 @@ export default function DocumentTranslation({
               onDragLeave={handleDragLeave}
               onClick={() => fileInputRef.current?.click()}
               style={{
-                height: '300px',
+                height: '220px',
                 border: `2px dashed ${isDragOver ? translatorColors.primary.brightRed : translatorColors.neutral.border}`,
                 borderRadius: '12px',
                 backgroundColor: isDragOver ? translatorColors.primary.rosePink : translatorColors.neutral.lightGray,
@@ -420,34 +420,53 @@ export default function DocumentTranslation({
               onClick={handleUpload}
               disabled={!selectedFile}
               style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '10px',
                 padding: '0 32px',
-                height: '44px',
+                height: '52px',
                 fontSize: '16px',
-                fontWeight: '600',
+                fontWeight: '700',
                 color: translatorColors.neutral.white,
-                backgroundColor: translatorColors.primary.brightRed,
+                background: selectedFile 
+                  ? `linear-gradient(135deg, ${translatorColors.primary.brightRed} 0%, ${translatorColors.primary.deepRed} 100%)`
+                  : translatorColors.neutral.border,
                 border: 'none',
-                borderRadius: '8px',
+                borderRadius: '12px',
                 cursor: selectedFile ? 'pointer' : 'not-allowed',
-                opacity: selectedFile ? 1 : 0.6,
-                transition: 'all 0.2s',
-                boxShadow: translatorColors.shadow.light,
+                opacity: selectedFile ? 1 : 0.7,
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                boxShadow: selectedFile 
+                  ? `0 4px 14px 0 rgba(255, 59, 48, 0.4)`
+                  : 'none',
+                letterSpacing: '0.3px',
               }}
               onMouseEnter={(e) => {
                 if (selectedFile) {
-                  e.currentTarget.style.backgroundColor = translatorColors.primary.deepRed;
-                  e.currentTarget.style.transform = 'translateY(-1px)';
-                  e.currentTarget.style.boxShadow = translatorColors.shadow.medium;
+                  e.currentTarget.style.transform = 'translateY(-2px) scale(1.02)';
+                  e.currentTarget.style.boxShadow = '0 6px 20px 0 rgba(255, 59, 48, 0.5)';
                 }
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = translatorColors.primary.brightRed;
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = translatorColors.shadow.light;
+                e.currentTarget.style.transform = 'translateY(0) scale(1)';
+                e.currentTarget.style.boxShadow = selectedFile 
+                  ? '0 4px 14px 0 rgba(255, 59, 48, 0.4)'
+                  : 'none';
+              }}
+              onMouseDown={(e) => {
+                if (selectedFile) {
+                  e.currentTarget.style.transform = 'translateY(0) scale(0.98)';
+                }
+              }}
+              onMouseUp={(e) => {
+                if (selectedFile) {
+                  e.currentTarget.style.transform = 'translateY(-2px) scale(1.02)';
+                }
               }}
             >
-              <Languages size={20} style={{ marginRight: '8px' }} />
-              AI Translate Document
+              <Languages size={22} strokeWidth={2.5} />
+              <span>Terjemahkan Dokumen</span>
             </button>
           </>
         )}
@@ -457,9 +476,9 @@ export default function DocumentTranslation({
             style={{
               display: 'flex',
               flexDirection: 'column',
-              gap: '24px',
+              gap: '16px',
               alignItems: 'center',
-              padding: '32px 16px',
+              padding: '24px 16px',
             }}
           >
             <Loader2
@@ -544,9 +563,9 @@ export default function DocumentTranslation({
             style={{
               display: 'flex',
               flexDirection: 'column',
-              gap: '24px',
+              gap: '16px',
               alignItems: 'center',
-              padding: '32px 16px',
+              padding: '24px 16px',
             }}
           >
             <CheckCircle2 size={64} color={translatorColors.accent.successGreen} />
