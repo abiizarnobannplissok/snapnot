@@ -1,5 +1,7 @@
 import { supabase } from '../lib/supabase';
 
+const STORAGE_BUCKET = 'translated-documents';
+
 export interface TranslationHistory {
   id: string;
   translationType: 'text' | 'document';
@@ -9,6 +11,7 @@ export interface TranslationHistory {
   translatedText?: string;
   documentName?: string;
   documentSize?: number;
+  storagePath?: string;
   translatedBy: string;
   createdAt: number;
   updatedAt: number;
@@ -23,6 +26,7 @@ interface TranslationHistoryDB {
   translated_text?: string;
   document_name?: string;
   document_size?: number;
+  storage_path?: string;
   translated_by: string;
   created_at: string;
   updated_at: string;
@@ -38,10 +42,57 @@ function mapFromDB(dbRecord: TranslationHistoryDB): TranslationHistory {
     translatedText: dbRecord.translated_text,
     documentName: dbRecord.document_name,
     documentSize: dbRecord.document_size,
+    storagePath: dbRecord.storage_path,
     translatedBy: dbRecord.translated_by,
     createdAt: new Date(dbRecord.created_at).getTime(),
     updatedAt: new Date(dbRecord.updated_at).getTime(),
   };
+}
+
+export async function uploadTranslatedDocument(blob: Blob, fileName: string): Promise<string> {
+  try {
+    const timestamp = Date.now();
+    const randomId = Math.random().toString(36).substring(7);
+    const storagePath = `translated/${timestamp}-${randomId}-${fileName}`;
+
+    console.log('📤 Uploading translated document to storage:', storagePath);
+
+    const { data, error } = await supabase.storage
+      .from(STORAGE_BUCKET)
+      .upload(storagePath, blob, {
+        cacheControl: '3600',
+        upsert: false,
+        contentType: 'application/pdf',
+      });
+
+    if (error) {
+      console.error('❌ Storage upload error:', error);
+      
+      if (error.message.includes('Bucket not found') || error.message.includes('not found')) {
+        throw new Error(`Storage bucket '${STORAGE_BUCKET}' belum dibuat. Buat bucket di Supabase Dashboard → Storage → Create bucket dengan nama '${STORAGE_BUCKET}' dan set sebagai Public.`);
+      }
+      
+      if (error.message.includes('row-level security')) {
+        throw new Error('Storage policy belum diset untuk translated-documents bucket.');
+      }
+      
+      throw new Error(`Gagal upload file: ${error.message}`);
+    }
+
+    console.log('✅ Translated document uploaded:', data.path);
+    return data.path;
+  } catch (error) {
+    console.error('❌ Upload translated document error:', error);
+    throw error;
+  }
+}
+
+export function getTranslatedDocumentUrl(storagePath: string): string {
+  const { data } = supabase.storage
+    .from(STORAGE_BUCKET)
+    .getPublicUrl(storagePath);
+  
+  return data.publicUrl;
 }
 
 export async function createTextTranslationHistory(
@@ -92,6 +143,7 @@ export async function createDocumentTranslationHistory(
   targetLang: string,
   documentName: string,
   documentSize: number,
+  storagePath: string,
   translatedBy: string = 'Anonymous'
 ): Promise<TranslationHistory> {
   try {
@@ -103,6 +155,7 @@ export async function createDocumentTranslationHistory(
         target_lang: targetLang,
         document_name: documentName,
         document_size: documentSize,
+        storage_path: storagePath,
         translated_by: translatedBy,
       })
       .select()

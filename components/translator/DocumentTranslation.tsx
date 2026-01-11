@@ -10,7 +10,7 @@ import {
   type DocumentStatusResponse
 } from '@/services/deepLService';
 import { translatorColors } from '@/constants/translatorColors';
-import { createDocumentTranslationHistory } from '@/services/translationHistoryService';
+import { createDocumentTranslationHistory, uploadTranslatedDocument } from '@/services/translationHistoryService';
 
 interface DocumentTranslationProps {
   apiKey: string;
@@ -329,14 +329,19 @@ export default function DocumentTranslation({
             setStage('complete');
 
             try {
+              console.log('[DocTranslate] Uploading translated document to storage...');
+              const storagePath = await uploadTranslatedDocument(blob, file.name);
+              console.log('[DocTranslate] Uploaded to:', storagePath);
+
               await createDocumentTranslationHistory(
                 sourceLang,
                 targetLang,
                 file.name,
                 file.size,
+                storagePath,
                 'Anonymous'
               );
-              console.log('[DocTranslate] History saved successfully');
+              console.log('[DocTranslate] History saved successfully with storage path');
             } catch (historyError) {
               console.error('[DocTranslate] Failed to save history:', historyError);
             }

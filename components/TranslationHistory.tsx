@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Clock, Trash2, FileText, FileCheck, Languages, Globe } from 'lucide-react';
+import { Clock, Trash2, FileText, Download, Languages, Globe } from 'lucide-react';
 import {
   TranslationHistory,
   getTranslationHistory,
   deleteTranslationHistory,
   subscribeToTranslationHistory,
+  getTranslatedDocumentUrl,
 } from '../services/translationHistoryService';
 import { ConfirmDialog } from './ConfirmDialog';
 import { Toast } from './Toast';
@@ -30,6 +31,15 @@ const LANGUAGE_NAMES: Record<string, string> = {
   PL: 'Polski',
   TR: 'Türkçe',
 };
+
+const CARD_COLORS = [
+  { bg: '#FEF3C7', border: '#FDE047', text: '#92400E' },
+  { bg: '#DBEAFE', border: '#93C5FD', text: '#1E3A8A' },
+  { bg: '#FCE7F3', border: '#F9A8D4', text: '#831843' },
+  { bg: '#D1FAE5', border: '#6EE7B7', text: '#065F46' },
+  { bg: '#E0E7FF', border: '#A5B4FC', text: '#3730A3' },
+  { bg: '#FFE4E6', border: '#FDA4AF', text: '#881337' },
+];
 
 function formatBytes(bytes: number): string {
   if (bytes === 0) return '0 B';
@@ -101,6 +111,38 @@ export function TranslationHistoryView({ searchQuery }: TranslationHistoryProps)
     }
   };
 
+  const handleDownload = async (item: TranslationHistory) => {
+    if (!item.storagePath || !item.documentName) {
+      showToast('File tidak tersedia untuk didownload', 'error');
+      return;
+    }
+
+    try {
+      showToast('📥 Mengunduh dokumen...', 'success');
+      
+      const publicUrl = getTranslatedDocumentUrl(item.storagePath);
+      
+      const response = await fetch(publicUrl);
+      if (!response.ok) throw new Error('Download failed');
+      
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = item.documentName.replace(/\.(pdf|docx|doc)$/i, `_${item.targetLang.toLowerCase()}.$1`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      
+      showToast('✓ Download selesai!', 'success');
+    } catch (error) {
+      console.error('Download error:', error);
+      showToast('Gagal mendownload file', 'error');
+    }
+  };
+
   const filteredHistory = history.filter((item) => {
     if (!searchQuery.trim()) return true;
     
@@ -137,7 +179,7 @@ export function TranslationHistoryView({ searchQuery }: TranslationHistoryProps)
         </div>
         <h3 className="text-xl font-medium text-gray-300 mb-2">Belum Ada History</h3>
         <p className="text-gray-500 max-w-md">
-          Riwayat terjemahan kamu akan muncul di sini setelah kamu melakukan terjemahan.
+          Riwayat terjemahan kamu akan muncul di sini setelah kamu melakukan terjemahan dokumen.
         </p>
       </div>
     );
@@ -159,95 +201,82 @@ export function TranslationHistoryView({ searchQuery }: TranslationHistoryProps)
 
   return (
     <>
-      <div className="space-y-4">
-        {filteredHistory.map((item) => (
-          <div
-            key={item.id}
-            className="bg-gray-800/40 backdrop-blur-sm rounded-xl p-4 border border-gray-700/50 hover:border-purple-500/50 transition-all group"
-          >
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-2">
-                  {item.translationType === 'text' ? (
-                    <FileText className="w-4 h-4 text-blue-400 flex-shrink-0" />
-                  ) : (
-                    <FileCheck className="w-4 h-4 text-green-400 flex-shrink-0" />
-                  )}
-                  <span className="text-sm font-medium text-gray-300 capitalize">
-                    {item.translationType === 'text' ? 'Teks' : 'Dokumen'}
-                  </span>
-                  <span className="text-gray-600">•</span>
-                  <span className="text-sm text-gray-400 truncate">
-                    {item.translatedBy}
-                  </span>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {filteredHistory.map((item, index) => {
+          const color = CARD_COLORS[index % CARD_COLORS.length];
+          
+          return (
+            <div
+              key={item.id}
+              className="rounded-xl shadow-sm hover:shadow-md transition-all duration-200 group relative overflow-hidden"
+              style={{
+                backgroundColor: color.bg,
+                borderLeft: `4px solid ${color.border}`,
+              }}
+            >
+              <div className="p-4">
+                <div className="flex items-start justify-between gap-2 mb-3">
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <FileText className="w-4 h-4 flex-shrink-0" style={{ color: color.text }} />
+                    <span className="text-xs font-medium truncate" style={{ color: color.text }}>
+                      {item.translatedBy}
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => setDeleteConfirm({ isOpen: true, id: item.id })}
+                    className="flex-shrink-0 p-1.5 hover:bg-black/10 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                    title="Hapus history"
+                    style={{ color: color.text }}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
                 </div>
 
                 <div className="flex items-center gap-2 mb-3">
-                  <div className="flex items-center gap-1.5 px-2.5 py-1 bg-gray-700/50 rounded-lg text-sm">
-                    <span className="text-gray-300 font-medium">
-                      {LANGUAGE_NAMES[item.sourceLang] || item.sourceLang}
-                    </span>
+                  <div className="flex items-center gap-1.5 px-2 py-1 bg-white/60 rounded-md text-xs font-medium" style={{ color: color.text }}>
+                    <span>{LANGUAGE_NAMES[item.sourceLang] || item.sourceLang}</span>
                   </div>
-                  <Languages className="w-4 h-4 text-purple-400 flex-shrink-0" />
-                  <div className="flex items-center gap-1.5 px-2.5 py-1 bg-gray-700/50 rounded-lg text-sm">
-                    <span className="text-gray-300 font-medium">
-                      {LANGUAGE_NAMES[item.targetLang] || item.targetLang}
-                    </span>
+                  <Languages className="w-3.5 h-3.5 flex-shrink-0" style={{ color: color.text }} />
+                  <div className="flex items-center gap-1.5 px-2 py-1 bg-white/60 rounded-md text-xs font-medium" style={{ color: color.text }}>
+                    <span>{LANGUAGE_NAMES[item.targetLang] || item.targetLang}</span>
                   </div>
                 </div>
 
-                {item.translationType === 'text' && item.sourceText && (
-                  <div className="space-y-2">
-                    <div className="bg-gray-900/50 rounded-lg p-3 border border-gray-700/30">
-                      <p className="text-xs text-gray-500 mb-1">Teks Asli:</p>
-                      <p className="text-sm text-gray-300 line-clamp-2">
-                        {item.sourceText}
+                {item.documentName && (
+                  <div className="bg-white/60 rounded-lg p-3 mb-3">
+                    <p className="text-sm font-medium truncate mb-1" style={{ color: color.text }}>
+                      {item.documentName}
+                    </p>
+                    {item.documentSize && (
+                      <p className="text-xs opacity-70" style={{ color: color.text }}>
+                        {formatBytes(item.documentSize)}
                       </p>
-                    </div>
-                    {item.translatedText && (
-                      <div className="bg-gray-900/50 rounded-lg p-3 border border-gray-700/30">
-                        <p className="text-xs text-gray-500 mb-1">Hasil Terjemahan:</p>
-                        <p className="text-sm text-gray-300 line-clamp-2">
-                          {item.translatedText}
-                        </p>
-                      </div>
                     )}
                   </div>
                 )}
 
-                {item.translationType === 'document' && item.documentName && (
-                  <div className="bg-gray-900/50 rounded-lg p-3 border border-gray-700/30">
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-300 truncate">
-                          {item.documentName}
-                        </p>
-                        {item.documentSize && (
-                          <p className="text-xs text-gray-500 mt-0.5">
-                            {formatBytes(item.documentSize)}
-                          </p>
-                        )}
-                      </div>
-                    </div>
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-1.5 text-xs opacity-70" style={{ color: color.text }}>
+                    <Clock className="w-3 h-3" />
+                    <span>{formatRelativeTime(item.createdAt)}</span>
                   </div>
-                )}
-
-                <div className="flex items-center gap-2 mt-3 text-xs text-gray-500">
-                  <Clock className="w-3.5 h-3.5" />
-                  <span>{formatRelativeTime(item.createdAt)}</span>
+                  
+                  {item.storagePath && (
+                    <button
+                      onClick={() => handleDownload(item)}
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-white/80 hover:bg-white rounded-lg transition-colors text-xs font-medium"
+                      style={{ color: color.text }}
+                      title="Download dokumen"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      <span>Download</span>
+                    </button>
+                  )}
                 </div>
               </div>
-
-              <button
-                onClick={() => setDeleteConfirm({ isOpen: true, id: item.id })}
-                className="flex-shrink-0 p-2 text-gray-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
-                title="Hapus history"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       <ConfirmDialog

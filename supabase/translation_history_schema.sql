@@ -21,8 +21,8 @@ CREATE TABLE IF NOT EXISTS translation_history (
   -- Document info (for document translation)
   document_name VARCHAR(255),
   document_size BIGINT,
+  storage_path TEXT,
   
-  -- User info
   translated_by VARCHAR(100) DEFAULT 'Anonymous',
   
   -- Timestamps
