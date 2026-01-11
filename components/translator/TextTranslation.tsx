@@ -83,10 +83,7 @@ export default function TextTranslation({ apiKey, onError, className = '' }: Tex
 
     setSourceLang(newSourceLang);
     setTargetLang(newTargetLang);
-
-    const tempText = sourceText;
-    setSourceText(translatedText);
-    setTranslatedText(tempText);
+    setTranslatedText('');
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
