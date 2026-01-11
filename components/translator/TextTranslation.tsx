@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ArrowLeftRight, ChevronDown, Languages } from 'lucide-react';
-import { SOURCE_LANGUAGES, TARGET_LANGUAGES } from '@/constants/languages';
+import { SOURCE_LANGUAGES, TARGET_LANGUAGES, type Language } from '@/constants/languages';
 import { translateText as apiTranslateText } from '@/services/deepLService';
 import { translatorColors } from '@/constants/translatorColors';
 
@@ -16,7 +16,6 @@ export default function TextTranslation({ apiKey, onError, className = '' }: Tex
   const [sourceLang, setSourceLang] = useState('EN');
   const [targetLang, setTargetLang] = useState('ID');
   const [isLoading, setIsLoading] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
 
   const charCount = sourceText.length;
   const maxChars = 5000;
@@ -83,40 +82,16 @@ export default function TextTranslation({ apiKey, onError, className = '' }: Tex
     }
   };
 
-  const buttonStyle: React.CSSProperties = {
-    backgroundColor: '#D4FF00',
-    color: '#000000',
-    border: 'none',
-    borderRadius: '20px',
-    fontSize: '18px',
-    fontWeight: '800',
-    textTransform: 'uppercase',
-    letterSpacing: '1px',
-    cursor: (isLoading || !sourceText.trim() || charCount > maxChars) ? 'not-allowed' : 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: '12px',
-    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-    boxShadow: isHovered && !isLoading ? '0 8px 25px rgba(212, 255, 0, 0.5)' : '0 4px 15px rgba(212, 255, 0, 0.3)',
-    transform: isHovered && !isLoading ? 'scale(1.05)' : 'scale(1)',
-    opacity: (isLoading || !sourceText.trim() || charCount > maxChars) ? 0.6 : 1,
-    padding: '20px 32px',
-    width: '100%',
-    minHeight: '64px',
-    zIndex: 50,
-  };
-
   return (
     <div className={className} style={{ padding: '16px' }}>
       <div
         style={{
           backgroundColor: translatorColors.neutral.warmGray,
           borderRadius: '12px',
-          padding: '24px',
+          padding: '20px',
           display: 'flex',
           flexDirection: 'column',
-          gap: '24px',
+          gap: '20px',
         }}
       >
         <div
@@ -134,13 +109,13 @@ export default function TextTranslation({ apiKey, onError, className = '' }: Tex
             style={{
               flex: '1',
               minWidth: '150px',
-              padding: '14px 18px',
+              padding: '12px 16px',
               fontSize: '16px',
-              fontWeight: '600',
+              fontWeight: '500',
               color: translatorColors.text.dark,
               backgroundColor: translatorColors.neutral.white,
-              border: `1px solid ${translatorColors.neutral.border}`,
-              borderRadius: '12px',
+              border: `1px solid ${translatorColors.neutral.borderLight}`,
+              borderRadius: '8px',
               cursor: 'pointer',
               outline: 'none',
             }}
@@ -157,10 +132,10 @@ export default function TextTranslation({ apiKey, onError, className = '' }: Tex
             disabled={isSwapDisabled}
             aria-label="Swap languages"
             style={{
-              padding: '14px',
+              padding: '12px',
               backgroundColor: translatorColors.neutral.white,
-              border: `1px solid ${translatorColors.neutral.border}`,
-              borderRadius: '12px',
+              border: `1px solid ${translatorColors.neutral.borderLight}`,
+              borderRadius: '8px',
               cursor: isSwapDisabled ? 'not-allowed' : 'pointer',
               opacity: isSwapDisabled ? 0.5 : 1,
               display: 'flex',
@@ -169,7 +144,7 @@ export default function TextTranslation({ apiKey, onError, className = '' }: Tex
               transition: 'all 0.2s',
             }}
           >
-            <ArrowLeftRight size={22} color={translatorColors.text.dark} />
+            <ArrowLeftRight size={20} color={translatorColors.text.gray} />
           </button>
 
           <select
@@ -179,13 +154,13 @@ export default function TextTranslation({ apiKey, onError, className = '' }: Tex
             style={{
               flex: '1',
               minWidth: '150px',
-              padding: '14px 18px',
+              padding: '12px 16px',
               fontSize: '16px',
-              fontWeight: '600',
+              fontWeight: '500',
               color: translatorColors.text.dark,
               backgroundColor: translatorColors.neutral.white,
-              border: `1px solid ${translatorColors.neutral.border}`,
-              borderRadius: '12px',
+              border: `1px solid ${translatorColors.neutral.borderLight}`,
+              borderRadius: '8px',
               cursor: 'pointer',
               outline: 'none',
             }}
@@ -198,11 +173,85 @@ export default function TextTranslation({ apiKey, onError, className = '' }: Tex
           </select>
         </div>
 
-        <div style={{ 
-          display: 'flex', 
-          flexDirection: 'column',
-          gap: '20px'
-        }}>
+        <div className="translation-content-grid">
+          <style>{`
+            .translation-content-grid {
+              display: grid;
+              grid-template-columns: 1fr;
+              gap: 16px;
+            }
+
+            @media (min-width: 992px) {
+              .translation-content-grid {
+                grid-template-columns: 1fr auto 1fr;
+                align-items: stretch;
+              }
+            }
+
+            .middle-action-separator {
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              justify-content: center;
+              gap: 12px;
+              padding: 8px 0;
+            }
+
+            .main-translate-btn {
+              width: 100%;
+              min-height: 56px;
+              padding: 0 24px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              gap: 12px;
+              background: linear-gradient(135deg, ${translatorColors.primary.brightRed}, ${translatorColors.primary.deepRed});
+              color: white;
+              border: none;
+              border-radius: 12px;
+              font-size: 18px;
+              font-weight: 700;
+              cursor: pointer;
+              transition: all 0.2s ease;
+              box-shadow: ${translatorColors.shadow.medium};
+              text-transform: uppercase;
+              letter-spacing: 0.5px;
+            }
+
+            @media (min-width: 992px) {
+              .main-translate-btn {
+                width: 64px;
+                height: 100%;
+                flex-direction: column;
+                padding: 24px 0;
+                border-radius: 32px;
+              }
+              
+              .main-translate-btn span {
+                writing-mode: vertical-lr;
+                transform: rotate(180deg);
+                margin: 12px 0;
+              }
+            }
+
+            .main-translate-btn:hover:not(:disabled) {
+              transform: scale(1.02);
+              box-shadow: ${translatorColors.shadow.heavy};
+              filter: brightness(1.1);
+            }
+
+            .main-translate-btn:active:not(:disabled) {
+              transform: scale(0.98);
+            }
+
+            .main-translate-btn:disabled {
+              background: ${translatorColors.neutral.border};
+              opacity: 0.6;
+              cursor: not-allowed;
+              box-shadow: none;
+            }
+          `}</style>
+
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <textarea
               value={sourceText}
@@ -211,46 +260,42 @@ export default function TextTranslation({ apiKey, onError, className = '' }: Tex
               placeholder="Enter text to translate..."
               aria-label="Source text"
               style={{
-                width: '100%',
-                height: '250px',
+                height: '300px',
                 padding: '20px',
-                fontSize: '18px',
+                fontSize: '17px',
                 lineHeight: '1.6',
-                color: '#000000',
-                backgroundColor: '#FFFFFF',
-                border: '2px solid #E5E5E5',
-                borderRadius: '16px',
-                outline: 'none',
+                color: translatorColors.text.dark,
+                backgroundColor: translatorColors.neutral.white,
+                border: `1px solid ${translatorColors.neutral.borderLight}`,
+                borderRadius: '12px',
                 resize: 'none',
-                fontFamily: 'inherit',
+                outline: 'none',
+                boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.02)',
+                fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
               }}
             />
-            <div style={{
-              fontSize: '13px',
-              color: charCount > maxChars ? '#FF3B30' : '#86868B',
-              fontWeight: '600',
-              marginTop: '8px',
-              textAlign: 'right'
-            }}>
+            <div
+              style={{
+                fontSize: '13px',
+                color: charCount > maxChars ? translatorColors.accent.errorRed : translatorColors.text.gray,
+                fontWeight: '600',
+                marginTop: '8px',
+                textAlign: 'right'
+              }}
+            >
               {charCount.toLocaleString()} / {maxChars.toLocaleString()}
             </div>
           </div>
 
-          <div style={{ 
-            display: 'flex', 
-            justifyContent: 'center',
-            padding: '10px 0'
-          }}>
+          <div className="middle-action-separator">
             <button
+              className="main-translate-btn"
               onClick={handleTranslate}
               disabled={isLoading || !sourceText.trim() || charCount > maxChars}
-              onMouseEnter={() => setIsHovered(true)}
-              onMouseLeave={() => setIsHovered(false)}
-              style={buttonStyle}
             >
-              <Languages size={28} strokeWidth={2.5} />
-              <span>{isLoading ? 'Translating...' : 'AI Translate'}</span>
-              <ChevronDown size={28} strokeWidth={2.5} />
+              <Languages size={24} />
+              <span>{isLoading ? '...' : 'AI Translate'}</span>
+              <ChevronDown size={24} />
             </button>
           </div>
 
@@ -261,27 +306,29 @@ export default function TextTranslation({ apiKey, onError, className = '' }: Tex
               placeholder={isLoading ? 'Translating...' : 'Translation will appear here...'}
               aria-label="Translated text"
               style={{
-                width: '100%',
-                height: '250px',
+                height: '300px',
                 padding: '20px',
-                fontSize: '18px',
+                fontSize: '17px',
                 lineHeight: '1.6',
-                color: '#000000',
-                backgroundColor: '#FFFFFF',
-                border: '2px solid #E5E5E5',
-                borderRadius: '16px',
-                outline: 'none',
+                color: translatorColors.text.dark,
+                backgroundColor: translatorColors.neutral.white,
+                border: `1px solid ${translatorColors.neutral.borderLight}`,
+                borderRadius: '12px',
                 resize: 'none',
+                outline: 'none',
                 cursor: 'default',
-                fontFamily: 'inherit',
+                boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.02)',
+                fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
               }}
             />
-            <div style={{
-              fontSize: '12px',
-              color: '#999999',
-              marginTop: '8px',
-              textAlign: 'center',
-            }}>
+            <div
+              style={{
+                fontSize: '12px',
+                color: translatorColors.text.light,
+                marginTop: '8px',
+                textAlign: 'center',
+              }}
+            >
               Press Ctrl+Enter to translate
             </div>
           </div>

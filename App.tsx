@@ -423,12 +423,12 @@ export default function App() {
                   </>
                 ) : activeTab === 'translator' ? (
                   <>
-                    <div className="relative group w-full md:max-w-[260px] flex-shrink-0">
-                      <Languages className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#95E1D3] w-4 h-4" />
-                      <div className="w-full h-11 pl-10 pr-4 rounded-2xl bg-white border border-transparent shadow-soft flex items-center">
-                        <span className="font-semibold text-sm text-gray-700">AI Translate</span>
-                      </div>
-                    </div>
+                    <button 
+                      className="h-11 flex items-center gap-2 bg-primary px-5 rounded-2xl text-sm font-bold text-black hover:scale-105 active:scale-95 transition-transform shadow-[0_4px_12px_rgba(212,255,0,0.4)] whitespace-nowrap flex-shrink-0"
+                    >
+                      <Languages className="w-4 h-4" />
+                      <span>AI Translate</span>
+                    </button>
                   </>
                 ) : null}
               </div>
