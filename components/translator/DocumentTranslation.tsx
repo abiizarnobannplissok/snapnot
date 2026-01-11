@@ -23,20 +23,41 @@ const ACCEPTED_FILE_TYPES = '.pdf,.docx,.doc';
 const MAX_FILE_SIZE_2GB = 2 * 1024 * 1024 * 1024;
 const POLL_INTERVAL_MS = 2000;
 
-const calculateMaxAttempts = (fileSizeBytes: number): number => {
-  const fileSizeMB = fileSizeBytes / (1024 * 1024);
+const estimateCharacterCount = (file: File): number => {
+  const fileSizeMB = file.size / (1024 * 1024);
+  const fileSizeKB = file.size / 1024;
   
-  if (fileSizeMB < 1) {
-    return 120;
-  } else if (fileSizeMB < 5) {
-    return 300;
-  } else if (fileSizeMB < 10) {
-    return 450;
-  } else if (fileSizeMB < 50) {
-    return 900;
-  } else {
-    return 1800;
+  if (file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {
+    return Math.floor(fileSizeKB * 100);
+  } else if (file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || 
+             file.name.toLowerCase().endsWith('.docx')) {
+    return Math.floor(fileSizeKB * 150);
+  } else if (file.type === 'application/msword' || file.name.toLowerCase().endsWith('.doc')) {
+    return Math.floor(fileSizeKB * 120);
   }
+  
+  return Math.floor(fileSizeKB * 100);
+};
+
+const calculateMaxAttempts = (estimatedChars: number): number => {
+  if (estimatedChars < 10000) {
+    return 150;
+  } else if (estimatedChars < 50000) {
+    return 450;
+  } else if (estimatedChars < 150000) {
+    return 900;
+  } else if (estimatedChars < 300000) {
+    return 1500;
+  } else {
+    return 2400;
+  }
+};
+
+const formatCharacterCount = (count: number): string => {
+  if (count >= 1000) {
+    return `${(count / 1000).toFixed(0)}k`;
+  }
+  return count.toString();
 };
 
 export default function DocumentTranslation({ 
@@ -106,12 +127,13 @@ export default function DocumentTranslation({
     }
   }, []);
 
-  const pollDocumentStatus = useCallback(async (docId: string, docKey: string, fileSize: number) => {
+  const pollDocumentStatus = useCallback(async (docId: string, docKey: string, file: File) => {
     pollAttemptsRef.current = 0;
-    const maxAttempts = calculateMaxAttempts(fileSize);
+    const estimatedChars = estimateCharacterCount(file);
+    const maxAttempts = calculateMaxAttempts(estimatedChars);
     const estimatedMinutes = Math.ceil((maxAttempts * POLL_INTERVAL_MS) / 60000);
     
-    console.log(`[DocTranslate] File size: ${(fileSize / (1024 * 1024)).toFixed(2)} MB, Max attempts: ${maxAttempts} (${estimatedMinutes} min)`);
+    console.log(`[DocTranslate] File: ${(file.size / (1024 * 1024)).toFixed(2)} MB, Est chars: ${formatCharacterCount(estimatedChars)}, Max attempts: ${maxAttempts} (${estimatedMinutes} min)`);
 
     const poll = async () => {
       try {
@@ -191,8 +213,10 @@ export default function DocumentTranslation({
     setUploadProgress(0);
     
     const fileSizeMB = selectedFile.size / (1024 * 1024);
-    if (fileSizeMB > 10) {
-      setStatusMessage(`File besar nih (${fileSizeMB.toFixed(1)} MB), sabar ya...`);
+    const estimatedChars = estimateCharacterCount(selectedFile);
+    
+    if (estimatedChars > 100000) {
+      setStatusMessage(`Dokumen besar nih (~${formatCharacterCount(estimatedChars)} karakter), sabar ya...`);
     } else {
       setStatusMessage('Lagi ngirim dokumennya nih...');
     }
@@ -206,7 +230,7 @@ export default function DocumentTranslation({
       setUploadProgress(10);
       setStatusMessage('Sip, sudah kekirim! Mulai terjemahin ya...');
 
-      await pollDocumentStatus(result.document_id, result.document_key, selectedFile.size);
+      await pollDocumentStatus(result.document_id, result.document_key, selectedFile);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Gagal upload nih';
       onError?.(errorMessage);
@@ -391,9 +415,9 @@ export default function DocumentTranslation({
                         marginBottom: '4px',
                       }}
                     >
-                      {(selectedFile.size / (1024 * 1024)).toFixed(2)} MB
+                      {(selectedFile.size / (1024 * 1024)).toFixed(2)} MB · ~{formatCharacterCount(estimateCharacterCount(selectedFile))} karakter
                     </div>
-                    {selectedFile.size > 10 * 1024 * 1024 && (
+                    {estimateCharacterCount(selectedFile) > 100000 && (
                       <div
                         style={{
                           fontSize: '12px',
@@ -401,7 +425,7 @@ export default function DocumentTranslation({
                           fontWeight: '500',
                         }}
                       >
-                        ⏱️ File besar, estimasi ~{Math.ceil(calculateMaxAttempts(selectedFile.size) * 2 / 60)} menit
+                        ⏱️ Dokumen besar, estimasi ~{Math.ceil(calculateMaxAttempts(estimateCharacterCount(selectedFile)) * 2 / 60)} menit
                       </div>
                     )}
                   </div>
