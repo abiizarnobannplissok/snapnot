@@ -13,6 +13,8 @@ interface TranslatorProps {
 }
 
 const API_KEY_STORAGE_KEY = 'snapnot_deepl_api_key';
+const MODE_STORAGE_KEY = 'snapnot_translator_mode';
+const DOC_STATE_STORAGE_KEY = 'snapnot_doc_translation_state';
 
 export const Translator: React.FC<TranslatorProps> = ({ onShowToast }) => {
   const [mode, setMode] = useState<TranslationMode>('text');
@@ -23,13 +25,24 @@ export const Translator: React.FC<TranslatorProps> = ({ onShowToast }) => {
   useEffect(() => {
     try {
       const savedApiKey = localStorage.getItem(API_KEY_STORAGE_KEY);
+      const savedMode = localStorage.getItem(MODE_STORAGE_KEY) as TranslationMode | null;
+      const docState = localStorage.getItem(DOC_STATE_STORAGE_KEY);
+      
       if (savedApiKey) {
         console.log('[Translator] Restored API key from localStorage');
         setSelectedApiKey(savedApiKey);
         setShowApiKeyManager(false);
       }
+      
+      if (docState) {
+        console.log('[Translator] Active document translation detected, switching to document mode');
+        setMode('document');
+      } else if (savedMode && (savedMode === 'text' || savedMode === 'document')) {
+        console.log('[Translator] Restored mode from localStorage:', savedMode);
+        setMode(savedMode);
+      }
     } catch (error) {
-      console.error('[Translator] Failed to restore API key:', error);
+      console.error('[Translator] Failed to restore state:', error);
     } finally {
       setIsLoading(false);
     }
@@ -56,6 +69,16 @@ export const Translator: React.FC<TranslatorProps> = ({ onShowToast }) => {
     if (onShowToast) {
       onShowToast('API key selected successfully!', 'success');
     }
+  };
+
+  const handleModeChange = (newMode: TranslationMode) => {
+    try {
+      localStorage.setItem(MODE_STORAGE_KEY, newMode);
+      console.log('[Translator] Mode saved to localStorage:', newMode);
+    } catch (error) {
+      console.error('[Translator] Failed to save mode:', error);
+    }
+    setMode(newMode);
   };
 
   if (isLoading) {
@@ -123,7 +146,7 @@ export const Translator: React.FC<TranslatorProps> = ({ onShowToast }) => {
                   { value: 'document', label: 'Dokumen', icon: <FileUp size={16} /> },
                 ]}
                 value={mode}
-                onChange={(value) => setMode(value as TranslationMode)}
+                onChange={(value) => handleModeChange(value as TranslationMode)}
               />
             </div>
 
