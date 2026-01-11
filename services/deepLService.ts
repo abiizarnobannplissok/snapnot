@@ -60,7 +60,7 @@ export const validateApiKey = async (key: string): Promise<ApiKeyValidationResul
     } else if (response.status === 403 || response.status === 401) {
       return { isValid: false, error: 'Invalid API key' };
     } else if (response.status === 456) {
-      return { isValid: false, error: 'Quota exceeded' };
+      return { isValid: false, error: 'Quota API habis! (DeepL Free: 500k karakter/bulan). Ganti ke API key lain ya!' };
     } else {
       const errorData = await response.json().catch(() => ({}));
       return { isValid: false, error: errorData.message || `Error: ${response.status}` };
@@ -120,7 +120,7 @@ export const translateText = async ({
       if (response.status === 403 || response.status === 401) {
         throw new Error('Invalid API key. Please check and try again.');
       } else if (response.status === 456) {
-        throw new Error('Translation quota exceeded. Please upgrade your DeepL plan.');
+        throw new Error('Quota API habis! (DeepL Free: 500k karakter/bulan). Klik tombol "🔑 API Key" di bawah untuk ganti ke API key lain ya!');
       } else if (response.status === 429) {
         throw new Error('Too many requests. Please wait a moment.');
       } else if (response.status === 413) {
@@ -193,7 +193,7 @@ export async function uploadDocument(
     if (response.status === 403 || response.status === 401) {
       throw new Error('Invalid API key');
     } else if (response.status === 456) {
-      throw new Error('Quota exceeded');
+      throw new Error('Quota API habis! (DeepL Free: 500k karakter/bulan). Klik tombol "🔑 API Key" di bawah untuk ganti ke API key lain ya!');
     } else if (response.status === 413) {
       throw new Error('File is too large (max 2GB)');
     }
