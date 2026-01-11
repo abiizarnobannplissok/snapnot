@@ -91,6 +91,7 @@ export default function DocumentTranslation({
   const [documentKey, setDocumentKey] = useState('');
   const [translatedBlob, setTranslatedBlob] = useState<Blob | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [showBackgroundNotice, setShowBackgroundNotice] = useState(false);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
   const pollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -392,6 +393,8 @@ export default function DocumentTranslation({
         timestamp: Date.now(),
       });
       console.log('[DocTranslate] State saved immediately after upload');
+      
+      setShowBackgroundNotice(true);
 
       await pollDocumentStatus(result.document_id, result.document_key, selectedFile);
     } catch (error) {
@@ -430,6 +433,7 @@ export default function DocumentTranslation({
     setDocumentId('');
     setDocumentKey('');
     setTranslatedBlob(null);
+    setShowBackgroundNotice(false);
     pollAttemptsRef.current = 0;
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
@@ -443,6 +447,7 @@ export default function DocumentTranslation({
     setStage('upload');
     setUploadProgress(0);
     setStatusMessage('');
+    setShowBackgroundNotice(false);
     pollAttemptsRef.current = 0;
   }, [stopPolling, clearState, onError]);
 
@@ -738,6 +743,55 @@ export default function DocumentTranslation({
             >
               {statusMessage}
             </div>
+
+            {showBackgroundNotice && uploadProgress >= 15 && (
+              <div
+                style={{
+                  width: '100%',
+                  maxWidth: '400px',
+                  padding: '12px 16px',
+                  backgroundColor: '#E3F2FD',
+                  border: '1px solid #1976D2',
+                  borderRadius: '8px',
+                  fontSize: '13px',
+                  color: '#1565C0',
+                  textAlign: 'center',
+                  lineHeight: '1.5',
+                  position: 'relative',
+                }}
+              >
+                <div style={{ fontWeight: '600', marginBottom: '4px' }}>
+                  ℹ️ Translate berjalan di background
+                </div>
+                <div style={{ fontSize: '12px' }}>
+                  Kamu bisa pindah tab, proses tetap jalan
+                </div>
+                <button
+                  onClick={() => setShowBackgroundNotice(false)}
+                  style={{
+                    position: 'absolute',
+                    top: '8px',
+                    right: '8px',
+                    background: 'transparent',
+                    border: 'none',
+                    color: '#1565C0',
+                    cursor: 'pointer',
+                    fontSize: '16px',
+                    padding: '2px 6px',
+                    borderRadius: '4px',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#BBDEFB';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                  }}
+                  aria-label="Tutup notifikasi"
+                >
+                  ✕
+                </button>
+              </div>
+            )}
 
             <div style={{ width: '100%', maxWidth: '400px' }}>
               <div
