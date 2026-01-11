@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { Upload, CheckCircle2, Download, Loader2, X, Languages } from 'lucide-react';
 import { SOURCE_LANGUAGES, TARGET_LANGUAGES } from '@/constants/languages';
 import { 
@@ -22,6 +22,22 @@ type Stage = 'upload' | 'progress' | 'complete';
 const ACCEPTED_FILE_TYPES = '.pdf,.docx,.doc';
 const MAX_FILE_SIZE_2GB = 2 * 1024 * 1024 * 1024;
 const POLL_INTERVAL_MS = 2000;
+const STORAGE_KEY = 'snapnot_doc_translation_state';
+
+interface TranslationState {
+  documentId: string;
+  documentKey: string;
+  fileName: string;
+  fileSize: number;
+  sourceLang: string;
+  targetLang: string;
+  uploadProgress: number;
+  statusMessage: string;
+  pollAttempts: number;
+  estimatedChars: number;
+  maxAttempts: number;
+  timestamp: number;
+}
 
 const estimateCharacterCount = (file: File): number => {
   const fileSizeMB = file.size / (1024 * 1024);
@@ -79,6 +95,113 @@ export default function DocumentTranslation({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const pollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const pollAttemptsRef = useRef(0);
+  const isPollingRef = useRef(false);
+  const maxAttemptsRef = useRef(0);
+  const estimatedCharsRef = useRef(0);
+
+  // Save state to localStorage
+  const saveState = useCallback((state: Partial<TranslationState>) => {
+    if (!documentId) return;
+    
+    const currentState: TranslationState = {
+      documentId,
+      documentKey,
+      fileName: selectedFile?.name || '',
+      fileSize: selectedFile?.size || 0,
+      sourceLang,
+      targetLang,
+      uploadProgress,
+      statusMessage,
+      pollAttempts: pollAttemptsRef.current,
+      estimatedChars: estimatedCharsRef.current,
+      maxAttempts: maxAttemptsRef.current,
+      timestamp: Date.now(),
+      ...state,
+    };
+    
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(currentState));
+      console.log('[DocTranslate] State saved to localStorage');
+    } catch (error) {
+      console.error('[DocTranslate] Failed to save state:', error);
+    }
+  }, [documentId, documentKey, selectedFile, sourceLang, targetLang, uploadProgress, statusMessage]);
+
+  // Clear state from localStorage
+  const clearState = useCallback(() => {
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+      console.log('[DocTranslate] State cleared from localStorage');
+    } catch (error) {
+      console.error('[DocTranslate] Failed to clear state:', error);
+    }
+  }, []);
+
+  // Restore state from localStorage
+  useEffect(() => {
+    try {
+      const savedState = localStorage.getItem(STORAGE_KEY);
+      if (!savedState) return;
+
+      const state: TranslationState = JSON.parse(savedState);
+      
+      // Check if state is stale (older than 2 hours)
+      const twoHoursAgo = Date.now() - 2 * 60 * 60 * 1000;
+      if (state.timestamp < twoHoursAgo) {
+        console.log('[DocTranslate] Saved state is stale, ignoring');
+        clearState();
+        return;
+      }
+
+      // Restore state
+      console.log('[DocTranslate] Restoring state from localStorage');
+      setDocumentId(state.documentId);
+      setDocumentKey(state.documentKey);
+      setSourceLang(state.sourceLang);
+      setTargetLang(state.targetLang);
+      setUploadProgress(state.uploadProgress);
+      setStatusMessage(state.statusMessage + ' (resumed)');
+      setStage('progress');
+      pollAttemptsRef.current = state.pollAttempts;
+      estimatedCharsRef.current = state.estimatedChars;
+      maxAttemptsRef.current = state.maxAttempts;
+
+      // Resume polling
+      const resumeFile = new File([], state.fileName, { type: 'application/pdf' });
+      Object.defineProperty(resumeFile, 'size', { value: state.fileSize });
+      setSelectedFile(resumeFile);
+      
+      // Start polling immediately
+      setTimeout(() => {
+        pollDocumentStatus(state.documentId, state.documentKey, resumeFile);
+      }, 100);
+    } catch (error) {
+      console.error('[DocTranslate] Failed to restore state:', error);
+      clearState();
+    }
+  }, []);
+
+  // Handle page visibility changes (browser tab switching)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        console.log('[DocTranslate] Tab hidden, state saved');
+        saveState({});
+      } else {
+        console.log('[DocTranslate] Tab visible again');
+        
+        // If polling was active, resume it
+        if (stage === 'progress' && documentId && documentKey && !isPollingRef.current) {
+          console.log('[DocTranslate] Resuming polling after tab became visible');
+          const resumeFile = selectedFile || new File([], '', { type: 'application/pdf' });
+          pollDocumentStatus(documentId, documentKey, resumeFile);
+        }
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [stage, documentId, documentKey, selectedFile, saveState]);
 
   const handleFileSelect = useCallback((file: File | null) => {
     if (!file) return;
@@ -125,13 +248,22 @@ export default function DocumentTranslation({
       clearTimeout(pollTimeoutRef.current);
       pollTimeoutRef.current = null;
     }
+    isPollingRef.current = false;
   }, []);
 
   const pollDocumentStatus = useCallback(async (docId: string, docKey: string, file: File) => {
-    pollAttemptsRef.current = 0;
+    if (isPollingRef.current) {
+      console.log('[DocTranslate] Polling already active, skipping duplicate');
+      return;
+    }
+
+    isPollingRef.current = true;
     const estimatedChars = estimateCharacterCount(file);
     const maxAttempts = calculateMaxAttempts(estimatedChars);
     const estimatedMinutes = Math.ceil((maxAttempts * POLL_INTERVAL_MS) / 60000);
+    
+    estimatedCharsRef.current = estimatedChars;
+    maxAttemptsRef.current = maxAttempts;
     
     console.log(`[DocTranslate] File: ${(file.size / (1024 * 1024)).toFixed(2)} MB, Est chars: ${formatCharacterCount(estimatedChars)}, Max attempts: ${maxAttempts} (${estimatedMinutes} min)`);
 
@@ -145,6 +277,7 @@ export default function DocumentTranslation({
         if (status.status === 'queued') {
           setStatusMessage('Bentar ya bos, lagi antre nih...');
           setUploadProgress(15);
+          saveState({ uploadProgress: 15, statusMessage: 'Bentar ya bos, lagi antre nih...' });
         } else if (status.status === 'translating') {
           const remaining = status.seconds_remaining || 0;
           
@@ -156,6 +289,7 @@ export default function DocumentTranslation({
           
           if (pollAttemptsRef.current > dynamicMaxAttempts) {
             stopPolling();
+            clearState();
             onError?.('Aduh, kelamaan nih. DeepL-nya lagi lemot, coba lagi ntar ya!');
             setStage('upload');
             return;
@@ -164,19 +298,23 @@ export default function DocumentTranslation({
           const progressPct = Math.min(25 + (pollAttemptsRef.current * 2), 70);
           setUploadProgress(Math.floor(progressPct));
           
+          let message = '';
           if (remaining > 0) {
             const minutes = Math.floor(remaining / 60);
             const seconds = remaining % 60;
             if (minutes > 0) {
-              setStatusMessage(`Sabar ya, lagi dimasak nih... (sekitar ${minutes} menit ${seconds} detik lagi)`);
+              message = `Sabar ya, lagi dimasak nih... (sekitar ${minutes} menit ${seconds} detik lagi)`;
             } else {
-              setStatusMessage(`Sabar ya, lagi dimasak nih... (sekitar ${seconds} detik lagi)`);
+              message = `Sabar ya, lagi dimasak nih... (sekitar ${seconds} detik lagi)`;
             }
           } else {
-            setStatusMessage(`Sabar ya, lagi dimasak nih... (${progressPct}%)`);
+            message = `Sabar ya, lagi dimasak nih... (${progressPct}%)`;
           }
+          setStatusMessage(message);
+          saveState({ uploadProgress: Math.floor(progressPct), statusMessage: message });
         } else if (status.status === 'done') {
           stopPolling();
+          clearState();
           setStatusMessage('Mantap! Berhasil diterjemahin!');
           setUploadProgress(100);
 
@@ -186,6 +324,7 @@ export default function DocumentTranslation({
           return;
         } else if (status.status === 'error') {
           stopPolling();
+          clearState();
           onError?.(status.error || 'Waduh, terjemahannya gagal nih. Coba cek filenya.');
           setStage('upload');
           return;
@@ -194,6 +333,7 @@ export default function DocumentTranslation({
         pollTimeoutRef.current = setTimeout(poll, POLL_INTERVAL_MS);
       } catch (error) {
         stopPolling();
+        clearState();
         const errorMessage = error instanceof Error ? error.message : 'Gagal ngecek status nih';
         onError?.(errorMessage);
         setStage('upload');
@@ -201,7 +341,7 @@ export default function DocumentTranslation({
     };
 
     await poll();
-  }, [apiKey, onError, stopPolling]);
+  }, [apiKey, onError, stopPolling, saveState, clearState]);
 
   const handleUpload = useCallback(async () => {
     if (!selectedFile) {
@@ -209,6 +349,7 @@ export default function DocumentTranslation({
       return;
     }
 
+    pollAttemptsRef.current = 0;
     setStage('progress');
     setUploadProgress(0);
     
@@ -259,6 +400,7 @@ export default function DocumentTranslation({
 
   const handleReset = useCallback(() => {
     stopPolling();
+    clearState();
     setStage('upload');
     setSelectedFile(null);
     setUploadProgress(0);
@@ -266,18 +408,21 @@ export default function DocumentTranslation({
     setDocumentId('');
     setDocumentKey('');
     setTranslatedBlob(null);
+    pollAttemptsRef.current = 0;
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
-  }, [stopPolling]);
+  }, [stopPolling, clearState]);
 
   const handleCancel = useCallback(() => {
     stopPolling();
+    clearState();
     onError?.('Translation cancelled');
     setStage('upload');
     setUploadProgress(0);
     setStatusMessage('');
-  }, [stopPolling, onError]);
+    pollAttemptsRef.current = 0;
+  }, [stopPolling, clearState, onError]);
 
   return (
     <div className={className} style={{ padding: '8px' }}>
