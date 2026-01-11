@@ -3,6 +3,7 @@ import { ArrowLeftRight, ChevronDown, Languages, Copy, Check } from 'lucide-reac
 import { SOURCE_LANGUAGES, TARGET_LANGUAGES } from '@/constants/languages';
 import { translateText as apiTranslateText } from '@/services/deepLService';
 import { translatorColors } from '@/constants/translatorColors';
+import { createTextTranslationHistory } from '@/services/translationHistoryService';
 
 interface TextTranslationProps {
   apiKey: string;

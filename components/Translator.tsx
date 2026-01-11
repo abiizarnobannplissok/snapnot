@@ -3,10 +3,11 @@ import { SegmentedControl } from './translator/SegmentedControl';
 import { ApiKeyManager } from './translator/ApiKeyManager';
 import TextTranslation from './translator/TextTranslation';
 import DocumentTranslation from './translator/DocumentTranslation';
+import { TranslationHistoryView } from './TranslationHistory';
 import { translatorColors } from '@/constants/translatorColors';
-import { FileText, FileUp } from 'lucide-react';
+import { FileText, FileUp, Clock } from 'lucide-react';
 
-type TranslationMode = 'text' | 'document';
+type TranslationMode = 'text' | 'document' | 'history';
 
 interface TranslatorProps {
   onShowToast?: (message: string, type: 'success' | 'error') => void;
@@ -37,7 +38,7 @@ export const Translator: React.FC<TranslatorProps> = ({ onShowToast }) => {
       if (docState) {
         console.log('[Translator] Active document translation detected, switching to document mode');
         setMode('document');
-      } else if (savedMode && (savedMode === 'text' || savedMode === 'document')) {
+      } else if (savedMode && (savedMode === 'text' || savedMode === 'document' || savedMode === 'history')) {
         console.log('[Translator] Restored mode from localStorage:', savedMode);
         setMode(savedMode);
       }
@@ -144,6 +145,7 @@ export const Translator: React.FC<TranslatorProps> = ({ onShowToast }) => {
                 options={[
                   { value: 'text', label: 'Teks', icon: <FileText size={16} /> },
                   { value: 'document', label: 'Dokumen', icon: <FileUp size={16} /> },
+                  { value: 'history', label: 'History', icon: <Clock size={16} /> },
                 ]}
                 value={mode}
                 onChange={(value) => handleModeChange(value as TranslationMode)}
@@ -161,6 +163,9 @@ export const Translator: React.FC<TranslatorProps> = ({ onShowToast }) => {
                 apiKey={selectedApiKey}
                 onError={handleError}
               />
+            </div>
+            <div style={{ display: mode === 'history' ? 'block' : 'none' }}>
+              <TranslationHistoryView searchQuery="" />
             </div>
 
             <div style={{ marginTop: '16px' }}>
