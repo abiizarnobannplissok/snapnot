@@ -21,8 +21,9 @@ type Stage = 'upload' | 'progress' | 'complete';
 
 const ACCEPTED_FILE_TYPES = '.pdf,.docx,.doc';
 const MAX_FILE_SIZE_2GB = 2 * 1024 * 1024 * 1024;
-const POLL_INTERVAL_MS = 2500;
-const MAX_POLL_ATTEMPTS = 720;
+const POLL_INTERVAL_MS = 2000;
+const MAX_POLL_ATTEMPTS = 180;
+const MAX_NETWORK_RETRIES = 3;
 
 export default function DocumentTranslation({ 
   apiKey, 
@@ -43,6 +44,7 @@ export default function DocumentTranslation({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const pollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const pollAttemptsRef = useRef(0);
+  const networkRetryRef = useRef(0);
 
   const handleFileSelect = useCallback((file: File | null) => {
     if (!file) return;
@@ -93,6 +95,7 @@ export default function DocumentTranslation({
 
   const pollDocumentStatus = useCallback(async (docId: string, docKey: string) => {
     pollAttemptsRef.current = 0;
+    networkRetryRef.current = 0;
 
     const poll = async () => {
       try {
@@ -100,21 +103,33 @@ export default function DocumentTranslation({
 
         if (pollAttemptsRef.current > MAX_POLL_ATTEMPTS) {
           stopPolling();
-          onError?.('Aduh, kelamaan nih. DeepL-nya lagi lemot, coba lagi ntar ya!');
+          onError?.('Proses terlalu lama. Coba file yang lebih kecil atau cek koneksi internet.');
           setStage('upload');
           return;
         }
 
         const status: DocumentStatusResponse = await checkDocumentStatus(docId, docKey, apiKey);
+        networkRetryRef.current = 0;
 
         if (status.status === 'queued') {
-          setStatusMessage('Bentar ya bos, lagi antre nih...');
+          const queueMessages = [
+            'Bentar ya bos, lagi antre nih...',
+            'Masih antre, server lagi rame...',
+            'Sabar ya, antreannya panjang...'
+          ];
+          setStatusMessage(queueMessages[pollAttemptsRef.current % 3]);
           setUploadProgress(15);
         } else if (status.status === 'translating') {
           const remaining = status.seconds_remaining || 0;
-          setStatusMessage(`Sabar ya, lagi dimasak nih... (sekitar ${remaining} detik lagi)`);
+          if (remaining > 60) {
+            setStatusMessage(`Lagi diproses... (sekitar ${Math.ceil(remaining / 60)} menit lagi)`);
+          } else if (remaining > 0) {
+            setStatusMessage(`Hampir selesai... (${remaining} detik lagi)`);
+          } else {
+            setStatusMessage('Lagi diproses, bentar lagi selesai...');
+          }
           
-          const calculatedProgress = Math.min(20 + (pollAttemptsRef.current * 0.4), 90);
+          const calculatedProgress = Math.min(20 + (pollAttemptsRef.current * 0.5), 90);
           setUploadProgress(Math.floor(calculatedProgress));
         } else if (status.status === 'done') {
           stopPolling();
@@ -127,16 +142,33 @@ export default function DocumentTranslation({
           return;
         } else if (status.status === 'error') {
           stopPolling();
-          onError?.(status.error || 'Waduh, terjemahannya gagal nih. Coba cek filenya.');
+          let errorMsg = 'Terjemahan gagal.';
+          if (status.error?.toLowerCase().includes('same language')) {
+            errorMsg = 'Bahasa asal dan target sama! Pilih bahasa yang berbeda.';
+          } else if (status.error?.toLowerCase().includes('quota')) {
+            errorMsg = 'Kuota API habis. Cek: deepl.com/account/usage';
+          } else {
+            errorMsg = status.error || 'Coba cek file dan bahasa, lalu ulangi.';
+          }
+          onError?.(errorMsg);
           setStage('upload');
           return;
         }
 
         pollTimeoutRef.current = setTimeout(poll, POLL_INTERVAL_MS);
       } catch (error) {
+        networkRetryRef.current += 1;
+        
+        if (networkRetryRef.current < MAX_NETWORK_RETRIES) {
+          setStatusMessage(`Koneksi terputus, mencoba ulang (${networkRetryRef.current}/${MAX_NETWORK_RETRIES})...`);
+          const backoffDelay = POLL_INTERVAL_MS * networkRetryRef.current;
+          pollTimeoutRef.current = setTimeout(poll, backoffDelay);
+          return;
+        }
+        
         stopPolling();
-        const errorMessage = error instanceof Error ? error.message : 'Gagal ngecek status nih';
-        onError?.(errorMessage);
+        const errorMessage = error instanceof Error ? error.message : 'Koneksi bermasalah';
+        onError?.(`${errorMessage}. Coba lagi nanti ya.`);
         setStage('upload');
       }
     };
@@ -147,6 +179,19 @@ export default function DocumentTranslation({
   const handleUpload = useCallback(async () => {
     if (!selectedFile) {
       onError?.('Pilih filenya dulu dong bos!');
+      return;
+    }
+
+    const sourceBase = sourceLang.split('-')[0].toUpperCase();
+    const targetBase = targetLang.split('-')[0].toUpperCase();
+    
+    if (sourceLang === targetLang) {
+      onError?.('Bahasa asal dan target harus berbeda!');
+      return;
+    }
+    
+    if (sourceBase === targetBase && sourceLang !== 'auto') {
+      onError?.(`Bahasa sama! ${sourceLang} dan ${targetLang} itu satu keluarga. Pilih yang beda ya!`);
       return;
     }
 
@@ -165,7 +210,16 @@ export default function DocumentTranslation({
 
       await pollDocumentStatus(result.document_id, result.document_key);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Gagal upload nih';
+      let errorMessage = 'Gagal upload nih';
+      if (error instanceof Error) {
+        if (error.message.toLowerCase().includes('same language')) {
+          errorMessage = 'Bahasa asal dan target sama! Pilih bahasa yang berbeda.';
+        } else if (error.message.toLowerCase().includes('quota')) {
+          errorMessage = 'Kuota API habis. Cek: deepl.com/account/usage';
+        } else {
+          errorMessage = error.message;
+        }
+      }
       onError?.(errorMessage);
       setStage('upload');
     }
