@@ -101,22 +101,25 @@ export default function DocumentTranslation({
 
   // Save state to localStorage
   const saveState = useCallback((state: Partial<TranslationState>) => {
-    if (!documentId) return;
+    const docId = state.documentId || documentId;
+    if (!docId) {
+      console.log('[DocTranslate] No documentId, skipping state save');
+      return;
+    }
     
     const currentState: TranslationState = {
-      documentId,
-      documentKey,
-      fileName: selectedFile?.name || '',
-      fileSize: selectedFile?.size || 0,
-      sourceLang,
-      targetLang,
-      uploadProgress,
-      statusMessage,
-      pollAttempts: pollAttemptsRef.current,
-      estimatedChars: estimatedCharsRef.current,
-      maxAttempts: maxAttemptsRef.current,
-      timestamp: Date.now(),
-      ...state,
+      documentId: docId,
+      documentKey: state.documentKey || documentKey,
+      fileName: state.fileName || selectedFile?.name || '',
+      fileSize: state.fileSize || selectedFile?.size || 0,
+      sourceLang: state.sourceLang || sourceLang,
+      targetLang: state.targetLang || targetLang,
+      uploadProgress: state.uploadProgress ?? uploadProgress,
+      statusMessage: state.statusMessage || statusMessage,
+      pollAttempts: state.pollAttempts ?? pollAttemptsRef.current,
+      estimatedChars: state.estimatedChars ?? estimatedCharsRef.current,
+      maxAttempts: state.maxAttempts ?? maxAttemptsRef.current,
+      timestamp: state.timestamp || Date.now(),
     };
     
     try {
@@ -370,6 +373,25 @@ export default function DocumentTranslation({
       setDocumentKey(result.document_key);
       setUploadProgress(10);
       setStatusMessage('Sip, sudah kekirim! Mulai terjemahin ya...');
+
+      estimatedCharsRef.current = estimateCharacterCount(selectedFile);
+      maxAttemptsRef.current = calculateMaxAttempts(estimatedCharsRef.current);
+
+      saveState({
+        documentId: result.document_id,
+        documentKey: result.document_key,
+        fileName: selectedFile.name,
+        fileSize: selectedFile.size,
+        sourceLang,
+        targetLang,
+        uploadProgress: 10,
+        statusMessage: 'Sip, sudah kekirim! Mulai terjemahin ya...',
+        pollAttempts: 0,
+        estimatedChars: estimatedCharsRef.current,
+        maxAttempts: maxAttemptsRef.current,
+        timestamp: Date.now(),
+      });
+      console.log('[DocTranslate] State saved immediately after upload');
 
       await pollDocumentStatus(result.document_id, result.document_key, selectedFile);
     } catch (error) {
